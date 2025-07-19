@@ -1,0 +1,51 @@
+/* Wrapper général : pousse le bloc vers la droite et en-dessous de la navbar */
+.upload-wrapper {
+  display: flex;
+  justify-content: flex-end; /* déplace à droite */
+  margin-top: 80px;          /* espace pour ne pas être sous la navbar (adapter si besoin) */
+  padding-right: 2rem;       /* marge droite */
+}
+
+/* Style du formulaire */
+.upload-form {
+  width: 320px;
+  padding: 1.5rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #fefefe;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.upload-form label {
+  display: block;
+  margin-top: 1rem;
+  font-weight: bold;
+}
+
+.upload-form input[type="text"],
+.upload-form input[type="file"] {
+  width: 100%;
+  padding: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.upload-form button {
+  margin-top: 1.5rem;
+  width: 100%;
+  padding: 0.5rem;
+  background-color: #007acc;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.upload-form button:hover {
+  background-color: #005c99;
+}
+
+.upload-message {
+  margin-top: 1rem;
+  color: green;
+  font-weight: bold;
+}

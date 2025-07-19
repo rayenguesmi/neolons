@@ -1,0 +1,218 @@
+<div class="gestion-roles-container">
+  <h2>Gestion des Rôles et Permissions</h2>
+
+  <!-- Messages -->
+  <div *ngIf="successMessage" class="alert alert-success">
+    {{ successMessage }}
+  </div>
+  <div *ngIf="errorMessage" class="alert alert-error">
+    {{ errorMessage }}
+  </div>
+
+  <!-- Barre d'outils -->
+  <div class="toolbar">
+    <div class="search-section">
+      <input 
+        type="text" 
+        [(ngModel)]="searchTerm" 
+        (input)="onSearch()" 
+        placeholder="Rechercher un rôle..."
+        class="search-input">
+    </div>
+
+    <div class="filter-section">
+      <label class="checkbox-label">
+        <input type="checkbox" [(ngModel)]="showSystemRoles" (change)="onFilterChange()">
+        Rôles système
+      </label>
+      <label class="checkbox-label">
+        <input type="checkbox" [(ngModel)]="showCustomRoles" (change)="onFilterChange()">
+        Rôles personnalisés
+      </label>
+      <label class="checkbox-label">
+        <input type="checkbox" [(ngModel)]="showActiveOnly" (change)="onFilterChange()">
+        Actifs uniquement
+      </label>
+    </div>
+
+    <div class="action-section">
+      <button class="btn btn-primary" (click)="showCreateForm()">
+        Créer un rôle
+      </button>
+    </div>
+  </div>
+
+  <!-- Formulaire de création/modification -->
+  <div *ngIf="showForm" class="form-modal">
+    <div class="form-container">
+      <h3>{{ isEditing ? 'Modifier le rôle' : 'Créer un nouveau rôle' }}</h3>
+      
+      <form (ngSubmit)="saveRole()">
+        <div class="form-group">
+          <label for="name">Nom du rôle *</label>
+          <input 
+            type="text" 
+            id="name" 
+            [(ngModel)]="currentRole.name" 
+            name="name"
+            required
+            placeholder="Ex: CHEF_PROJET"
+            class="form-input">
+        </div>
+
+        <div class="form-group">
+          <label for="displayName">Nom d'affichage *</label>
+          <input 
+            type="text" 
+            id="displayName" 
+            [(ngModel)]="currentRole.displayName" 
+            name="displayName"
+            required
+            placeholder="Ex: Chef de Projet"
+            class="form-input">
+        </div>
+
+        <div class="form-group">
+          <label for="description">Description *</label>
+          <textarea 
+            id="description" 
+            [(ngModel)]="currentRole.description" 
+            name="description"
+            required
+            placeholder="Description du rôle et de ses responsabilités"
+            class="form-textarea"
+            rows="3"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="checkbox-label">
+            <input type="checkbox" [(ngModel)]="currentRole.isActive" name="isActive">
+            Rôle actif
+          </label>
+        </div>
+
+        <!-- Sélection des permissions -->
+        <div class="permissions-section">
+          <h4>Permissions</h4>
+          <div class="permissions-grid">
+            <div *ngFor="let module of getModuleKeys()" class="permission-module">
+              <div class="module-header">
+                <label class="checkbox-label module-checkbox">
+                  <input 
+                    type="checkbox" 
+                    [checked]="isModuleFullySelected(module)"
+                    [indeterminate]="isModulePartiallySelected(module)"
+                    (change)="toggleModulePermissions(module, $any($event.target).checked)">
+                  <strong>{{ module.replace('_', ' ') }}</strong>
+                </label>
+              </div>
+              <div class="module-permissions">
+                <label 
+                  *ngFor="let permission of permissionsByModule[module]" 
+                  class="checkbox-label permission-checkbox">
+                  <input 
+                    type="checkbox" 
+                    [checked]="isPermissionSelected(permission.name)"
+                    (change)="onPermissionChange(permission.name, $any($event.target).checked)">
+                  {{ permission.displayName }}
+                  <small class="permission-description">{{ permission.description }}</small>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">
+            {{ isEditing ? 'Modifier' : 'Créer' }}
+          </button>
+          <button type="button" class="btn btn-secondary" (click)="cancelForm()">
+            Annuler
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Liste des rôles -->
+  <div class="roles-table-container">
+    <table class="roles-table">
+      <thead>
+        <tr>
+          <th>Nom d'affichage</th>
+          <th>Nom technique</th>
+          <th>Description</th>
+          <th>Type</th>
+          <th>Permissions</th>
+          <th>Statut</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let role of filteredRoles" [class.inactive]="!role.isActive">
+          <td>
+            <strong>{{ role.displayName }}</strong>
+          </td>
+          <td>
+            <code>{{ role.name }}</code>
+          </td>
+          <td>
+            {{ role.description }}
+          </td>
+          <td>
+            <span class="badge" [class.system]="role.isSystemRole" [class.custom]="!role.isSystemRole">
+              {{ role.isSystemRole ? 'Système' : 'Personnalisé' }}
+            </span>
+          </td>
+          <td>
+            <div class="permissions-list">
+              <span *ngFor="let permission of role.permissions" class="permission-tag">
+                {{ permission }}
+              </span>
+            </div>
+          </td>
+          <td>
+            <span class="status" [class.active]="role.isActive" [class.inactive]="!role.isActive">
+              {{ role.isActive ? 'Actif' : 'Inactif' }}
+            </span>
+          </td>
+          <td>
+            <div class="action-buttons">
+              <button 
+                *ngIf="!role.isSystemRole" 
+                class="btn btn-sm btn-secondary" 
+                (click)="editRole(role)"
+                title="Modifier">
+                Modifier
+              </button>
+              <button 
+                *ngIf="!role.isSystemRole" 
+                class="btn btn-sm" 
+                [class.btn-warning]="role.isActive"
+                [class.btn-success]="!role.isActive"
+                (click)="toggleRoleStatus(role)"
+                [title]="role.isActive ? 'Désactiver' : 'Activer'">
+                {{ role.isActive ? 'Désactiver' : 'Activer' }}
+              </button>
+              <button 
+                *ngIf="!role.isSystemRole" 
+                class="btn btn-sm btn-danger" 
+                (click)="deleteRole(role)"
+                title="Supprimer">
+                Supprimer
+              </button>
+              <span *ngIf="role.isSystemRole" class="system-role-notice">
+                Rôle système (non modifiable)
+              </span>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div *ngIf="filteredRoles.length === 0" class="no-results">
+      Aucun rôle trouvé avec les critères de recherche actuels.
+    </div>
+  </div>
+</div>
+

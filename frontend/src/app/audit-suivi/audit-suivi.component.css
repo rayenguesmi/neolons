@@ -1,0 +1,14 @@
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: Arial, sans-serif;
+  margin-left: 200px; /* Ajustez cette valeur en fonction de la largeur de votre menu */
+  transition: margin-left 0.3s ease-in-out;
+}
+
+.title {
+  text-align: center;
+  font-size: 1.8rem;
+  margin-bottom: 20px;
+}

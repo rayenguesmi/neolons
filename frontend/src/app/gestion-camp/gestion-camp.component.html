@@ -1,0 +1,282 @@
+<div class="container">
+  <h1 class="title"><i class="fa fa-tasks"></i> Gestionnaire de Campagnes</h1>
+
+  <!-- Barre supérieure : boutons + recherche -->
+  <div class="top-bar">
+    <div class="left-section">
+      <div class="buttons-group">
+        <button class="btn-icon" (click)="openAddCamp()">
+          <i class="fas fa-plus"></i>
+        </button>
+        <button class="btn-icon" (click)="exportData()">
+          <i class="fas fa-cloud-upload-alt"></i>
+        </button>
+        <button class="btn-icon" (click)="reloadPage()">
+          <i class="fas fa-sync-alt"></i>
+        </button>
+      </div>
+      <div class="search-container">
+        <input
+          type="text"
+          placeholder="Rechercher..."
+          [(ngModel)]="searchQuery"
+          (input)="filterTable()"
+        />
+      </div>
+    </div>
+  </div>
+
+  <!-- Tableau des données -->
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Titre</th>
+        <th>Version</th>
+        <th>Projet</th>
+        <th>Nb de Rapports</th>
+        <th>Date</th>
+        <th>Nb d'Exécution</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let item of pagedTableData">
+        <td>{{ item.id }}</td>
+        <td>{{ item.titre }}</td>
+        <td>{{ item.version }}</td>
+        <td>{{ item.projet }}</td>
+        <td>{{ item.nbRapports }}</td>
+        <td>{{ item.date }}</td>
+        <td>{{ item.nbExecution }}</td>
+        <td>
+          <span
+            class="three-dots"
+            (click)="toggleMenu($event, item.id)"
+            aria-label="Menu d'actions"
+          >
+            &#x2022;&#x2022;&#x2022;
+          </span>
+          <div
+            *ngIf="menuVisible && activeMenuId === item.id"
+            class="dropdown-menu"
+          >
+            <button class="action-btn" (click)="showDetails(item)">
+              Détails
+            </button>
+            <button class="action-btn" (click)="openModal(item)">
+              Modifier
+            </button>
+            <button class="action-btn" (click)="duplicateCampaign(item)">
+              Dupliquer
+            </button>
+            <button
+              class="action-btn"
+              [disabled]="!item.disabled"
+              (click)="confirmActivation(item)"
+            >
+              Réactiver
+            </button>
+            <button
+              class="action-btn"
+              [disabled]="item.disabled"
+              (click)="confirmDeactivation(item)"
+            >
+              Désactiver
+            </button>
+            <button class="action-btn" (click)="confirmDeletion(item)">
+              Supprimer
+            </button>
+            <button class="action-btn" (click)="executeTask(item)">
+              Lancer l'exécution
+            </button>
+            <button class="action-btn" (click)="assignDocuments(item)">
+              Affecter des docs
+            </button>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <!-- Ajout du popup de confirmation -->
+  <div *ngIf="confirmationVisible" class="confirmation-modal">
+    <div class="modal-content">
+      <p>{{ confirmationMessage }}</p>
+      <button class="confirm-btn" (click)="proceedWithConfirmation()">
+        Confirmer
+      </button>
+      <button class="cancel-btn" (click)="closeConfirmation()">Annuler</button>
+    </div>
+  </div>
+
+  <!-- Pagination sous le tableau -->
+  <div class="pagination-container">
+    <button
+      (click)="previousPage()"
+      [disabled]="currentPage === 1"
+      aria-label="Page précédente"
+    >
+      ←
+    </button>
+    <span>Page {{ currentPage }} sur {{ totalPages }}</span>
+    <button
+      (click)="nextPage()"
+      [disabled]="currentPage === totalPages"
+      aria-label="Page suivante"
+    >
+      →
+    </button>
+  </div>
+
+  <!-- Notifications -->
+  <div class="popup" *ngIf="showPopup">
+    <span>{{ popupMessage }}</span>
+  </div>
+  <!-- Popup Modal pour l'affectation des documents -->
+  <div *ngIf="showAssignDocsModal" class="modal">
+    <div class="modal-content">
+      <button class="close-btn" (click)="closeAssignDocsModal()">
+        &#x2715;
+      </button>
+      <h2>Affecter des documents</h2>
+
+      <!-- Liste des fichiers récupérés dans un tableau -->
+      <div *ngIf="userFiles.length > 0">
+        <table class="file-table">
+          <thead>
+            <tr>
+              <th>
+                <input
+                  type="checkbox"
+                  (change)="selectAllFiles($event)"
+                  [checked]="isAllSelected()"
+                />
+                Sélectionner tous
+              </th>
+              <th>Nom du fichier</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let file of userFiles">
+              <td><input type="checkbox" [(ngModel)]="file.selected" /></td>
+              <td>{{ file.filename }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Boutons pour confirmer ou annuler -->
+      <div class="modal-actions">
+        <button (click)="confirmAssignDocs()">Confirmer</button>
+        <button (click)="closeAssignDocsModal()">Annuler</button>
+      </div>
+    </div>
+  </div>
+  <!-- Popup de modification -->
+  <div *ngIf="showEditModal || showAddModal" class="modal">
+    <div class="modal-content">
+      <button class="close-btn" (click)="closeModal()">&#x2715;</button>
+      <h2>{{ isEditMode ? "Modifier" : "Ajouter" }} une campagne</h2>
+      <form (submit)="submitEditForm()">
+        <label>Titre :</label>
+        <input
+          [(ngModel)]="editData.titre"
+          name="titre"
+          required
+          placeholder="Camp X"
+        />
+
+        <label>Version :</label>
+        <input
+          [(ngModel)]="editData.version"
+          name="version"
+          required
+          placeholder="1.0 ou 1.0.1"
+        />
+
+        <label>Projet :</label>
+        <input
+          [(ngModel)]="editData.projet"
+          name="projet"
+          required
+          placeholder="Nom du projet"
+        />
+
+        <label>Nb de Rapports :</label>
+        <input
+          [(ngModel)]="editData.nbRapports"
+          name="nbRapports"
+          type="number"
+          min="0"
+          required
+        />
+
+        <label>Date :</label>
+        <input [(ngModel)]="editData.date" name="date" type="date" required />
+
+        <label>Nb d'Exécution :</label>
+        <input
+          [(ngModel)]="editData.nbExecution"
+          name="nbExecution"
+          type="number"
+          min="0"
+          required
+        />
+
+        <button type="submit">
+          {{ isEditMode ? "Enregistrer" : "Ajouter" }}
+        </button>
+        <button type="button" (click)="closeModal()">Annuler</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Popup Détails -->
+  <div *ngIf="showDetailsModal" class="modal">
+    <div class="modal-content">
+      <button class="close-btn" (click)="closeDetailsModal()">&#x2715;</button>
+      <h2>Détails de la campagne</h2>
+
+      <div class="details-section">
+        <!-- Informations de la campagne -->
+        <div class="campaign-info">
+          <h3>Informations de la campagne</h3>
+          <p><strong>ID :</strong> {{ selectedCampaign?.id }}</p>
+          <p><strong>Titre :</strong> {{ selectedCampaign?.titre }}</p>
+          <p><strong>Version :</strong> {{ selectedCampaign?.version }}</p>
+          <p><strong>Projet :</strong> {{ selectedCampaign?.projet }}</p>
+          <p>
+            <strong>Nb de Rapports :</strong> {{ selectedCampaign?.nbRapports }}
+          </p>
+          <p><strong>Date :</strong> {{ selectedCampaign?.date }}</p>
+          <p>
+            <strong>Nb d'Exécution :</strong>
+            {{ selectedCampaign?.nbExecution }}
+          </p>
+          <p>
+            <strong>Dernière exécution :</strong>
+            {{ selectedCampaign?.lastExecution }}
+          </p>
+          <i
+            class="fas fa-edit edit-icon"
+            (click)="openModal(selectedCampaign)"
+            title="Modifier Infos"
+          ></i>
+        </div>
+        <!-- Deuxième partie : Affectation de documents -->
+        <div class="doc-assignment">
+          <h3>Affectation de documents</h3>
+          <ul>
+            <li *ngFor="let doc of assignedDocs">{{ doc }}</li>
+          </ul>
+          <!-- Icône de modification pour documents -->
+          <i
+            class="fas fa-edit edit-icon"
+            (click)="assignDocuments(selectedCampaign)"
+            title="Modifier Documents"
+          ></i>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

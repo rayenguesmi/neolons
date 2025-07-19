@@ -1,0 +1,318 @@
+/* Applique le style au container Angular Material (nécessite ::ng-deep) */
+::ng-deep .mat-dialog-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 !important;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  background-color: transparent;
+}
+
+/* Conteneur principal du formulaire */
+.user-form-dialog {
+  width: 100%;
+  max-width: 600px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  margin: auto;
+  animation: slideIn 0.3s ease-out;
+  overflow: hidden;
+}
+
+/* En-tête */
+.dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px;
+  border-bottom: 1px solid #e0e0e0;
+  background-color: #f8f9ff;
+}
+
+.dialog-header h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+}
+
+.dialog-header h2 i {
+  color: #667eea;
+}
+
+.close-btn {
+  color: #666;
+}
+
+/* Contenu */
+.dialog-content {
+  padding: 0 24px;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+/* Scrollbar moderne */
+.dialog-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.dialog-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.dialog-content::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #667eea, #764ba2);
+  border-radius: 8px;
+  transition: background 0.3s ease;
+}
+
+.dialog-content::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #5a67d8, #6b46c1);
+}
+
+/* Formulaire */
+.user-form {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+/* Sections */
+.form-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.section-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.section-title i {
+  color: #667eea;
+}
+
+/* Form rows & fields */
+.form-row {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.form-field {
+  flex: 1;
+}
+
+.mat-form-field {
+  width: 100%;
+}
+
+.mat-form-field-appearance-outline .mat-form-field-outline {
+  border-radius: 8px;
+}
+
+.mat-form-field-appearance-outline.mat-focused .mat-form-field-outline-thick {
+  color: #667eea;
+}
+
+.mat-form-field-appearance-outline.mat-focused .mat-form-field-label {
+  color: #667eea;
+}
+
+/* Toggle actif/inactif */
+.status-toggle {
+  margin: 16px 0;
+}
+
+.toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+}
+
+.toggle-label i.fa-check-circle {
+  color: #4caf50;
+}
+
+.toggle-label i.fa-times-circle {
+  color: #f44336;
+}
+
+/* Rôles */
+.roles-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.role-option {
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 16px;
+  background: white;
+  transition: all 0.3s ease;
+}
+
+.role-option:hover {
+  border-color: #667eea;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+}
+
+.role-option.selected {
+  border-color: #667eea;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
+}
+
+.role-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.role-icon {
+  font-size: 1.2rem;
+  color: #667eea;
+}
+
+.role-label {
+  font-weight: 600;
+  color: #333;
+}
+
+.role-description {
+  font-size: 0.9rem;
+  color: #666;
+  line-height: 1.4;
+}
+
+.roles-error {
+  margin-top: 8px;
+  font-size: 0.75rem;
+  color: red;
+}
+
+/* Projets */
+.projects-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.project-option {
+  padding: 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.project-option:hover {
+  border-color: #667eea;
+  background-color: #f8f9ff;
+}
+
+.projects-hint {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  color: #666;
+  background-color: #f8f9fa;
+  padding: 12px;
+  border-radius: 8px;
+  border-left: 4px solid #667eea;
+}
+
+.projects-hint i {
+  color: #667eea;
+}
+
+/* Actions */
+.dialog-actions {
+  padding: 24px;
+  border-top: 1px solid #e0e0e0;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  background-color: #f8f9ff;
+}
+
+.cancel-btn {
+  color: #666;
+  border-color: #ddd;
+}
+
+.cancel-btn:hover {
+  background-color: #f5f5f5;
+}
+
+.submit-btn {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  font-weight: 600;
+  padding: 0 24px;
+}
+
+.submit-btn:disabled {
+  background: #ccc;
+  color: #999;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .user-form-dialog {
+    width: 100vw;
+    height: 100vh;
+    border-radius: 0;
+  }
+
+  .dialog-header,
+  .dialog-content,
+  .dialog-actions {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .form-row {
+    flex-direction: column;
+  }
+
+  .projects-container {
+    grid-template-columns: 1fr;
+  }
+
+  .dialog-actions {
+    flex-direction: column-reverse;
+  }
+
+  .cancel-btn,
+  .submit-btn {
+    width: 100%;
+  }
+}
+
+/* Animation */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

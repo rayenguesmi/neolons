@@ -1,0 +1,72 @@
+nohup: ignoring input
+Warning: Running a server with --disable-host-check is a security risk. See https://medium.com/webpack/webpack-dev-server-middleware-security-issues-1489d950874a for more information.
+- Generating browser application bundles (phase: setup)...
+✔ Browser application bundle generation complete.
+
+Initial Chunk Files   | Names         |  Raw Size
+vendor.js             | vendor        |   2.59 MB |
+polyfills.js          | polyfills     | 319.34 kB |
+main.js               | main          | 214.56 kB |
+styles.css, styles.js | styles        | 211.38 kB |
+runtime.js            | runtime       |   6.61 kB |
+
+| Initial Total |   3.32 MB
+
+Build at: 2025-07-09T18:25:15.482Z - Hash: 490d5c34acb47975 - Time: 5287ms
+
+Warning: /home/ubuntu/project/neo_tm_keycloak/frontend/node_modules/keycloak-js/dist/keycloak.mjs depends on 'js-sha256'. CommonJS or AMD dependencies can cause optimization bailouts.
+For more info see: https://angular.io/guide/build#configuring-commonjs-dependencies
+
+
+
+** Angular Live Development Server is listening on 0.0.0.0:4200, open your browser on http://localhost:4200/ **
+
+
+✔ Compiled successfully.
+✔ Browser application bundle generation complete.
+
+Initial Chunk Files | Names   |  Raw Size
+main.js             | main    | 215.03 kB |
+runtime.js          | runtime |   6.61 kB |
+
+3 unchanged chunks
+
+Build at: 2025-07-09T18:26:25.781Z - Hash: cebc87da31cb22c1 - Time: 718ms
+
+✔ Compiled successfully.
+✔ Browser application bundle generation complete.
+
+Initial Chunk Files | Names   |  Raw Size
+main.js             | main    | 215.27 kB |
+runtime.js          | runtime |   6.61 kB |
+
+3 unchanged chunks
+
+Build at: 2025-07-09T18:26:32.924Z - Hash: 0080188c10828487 - Time: 293ms
+
+✔ Compiled successfully.
+✔ Browser application bundle generation complete.
+
+Initial Chunk Files | Names   |  Raw Size
+main.js             | main    | 216.50 kB |
+runtime.js          | runtime |   6.61 kB |
+
+3 unchanged chunks
+
+Build at: 2025-07-09T18:26:44.134Z - Hash: f36216801880dab9 - Time: 319ms
+
+✔ Compiled successfully.
+✔ Browser application bundle generation complete.
+
+Initial Chunk Files | Names   | Raw Size
+vendor.js           | vendor  |  2.18 MB |
+main.js             | main    | 24.33 kB |
+runtime.js          | runtime |  6.48 kB |
+
+2 unchanged chunks
+
+Build at: 2025-07-09T18:26:59.340Z - Hash: 5903cd2b8e0eb215 - Time: 266ms
+
+✔ Compiled successfully.
+(node:9439) [DEP0060] DeprecationWarning: The `util._extend` API is deprecated. Please use Object.assign() instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
