@@ -66,10 +66,7 @@ const routes: Routes = [
       }
     ],
   },
-  { 
-    path: '**', 
-    redirectTo: '' 
-  }
+ 
 ];
 
 @NgModule({
@@ -78,5 +75,6 @@ const routes: Routes = [
   exports: [RouterModule],
 })
 export class AppRoutingModule {}
+
 
 

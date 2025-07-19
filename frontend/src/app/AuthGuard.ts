@@ -24,7 +24,8 @@ export class AuthGuard extends KeycloakAuthGuard {
   ): Promise<boolean | UrlTree> {
     if (!this.authenticated) {
       await this.keycloak.login({
-        redirectUri: window.location.origin + state.url,
+        redirectUri: window.location.origin + 
+          (state.url === '/' ? '/home' : state.url),
       });
     } else {
       this.keycloak.getToken().then((token) => {

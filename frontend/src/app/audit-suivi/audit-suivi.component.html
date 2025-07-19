@@ -1,3 +1,203 @@
 <div class="container">
-  <h1 class="title"><i class="fas fa-clipboard-check"></i> Audit et Suivi</h1>
+  <h1 class="title"><i class="fas fa-shield-alt"></i> Journalisation & Sécurité</h1>
+  
+  <div class="audit-dashboard">
+    <!-- Section Historique des Actions -->
+    <div class="audit-section">
+      <h2><i class="fas fa-history"></i> Historique Complet des Actions</h2>
+      <div class="audit-filters">
+        <div class="filter-group">
+          <label>Type d'action:</label>
+          <select>
+            <option value="">Toutes les actions</option>
+            <option value="creation">Création</option>
+            <option value="modification">Modification</option>
+            <option value="suppression">Suppression</option>
+            <option value="consultation">Consultation</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>Utilisateur:</label>
+          <input type="text" placeholder="Nom d'utilisateur">
+        </div>
+        <div class="filter-group">
+          <label>Date:</label>
+          <input type="date">
+        </div>
+        <button class="btn-filter">Filtrer</button>
+      </div>
+      
+      <div class="audit-table">
+        <table>
+          <thead>
+            <tr>
+              <th>Date/Heure</th>
+              <th>Utilisateur</th>
+              <th>Action</th>
+              <th>Ressource</th>
+              <th>Détails</th>
+              <th>IP</th>
+              <th>Statut</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>2024-01-15 14:30:25</td>
+              <td>admin@neolons.com</td>
+              <td><span class="action-badge creation">Création</span></td>
+              <td>Document - Contrat_2024.pdf</td>
+              <td>Création d'un nouveau document contractuel</td>
+              <td>192.168.1.100</td>
+              <td><span class="status-success">Succès</span></td>
+            </tr>
+            <tr>
+              <td>2024-01-15 14:25:10</td>
+              <td>user@neolons.com</td>
+              <td><span class="action-badge modification">Modification</span></td>
+              <td>Utilisateur - Jean Dupont</td>
+              <td>Modification des permissions utilisateur</td>
+              <td>192.168.1.105</td>
+              <td><span class="status-success">Succès</span></td>
+            </tr>
+            <tr>
+              <td>2024-01-15 14:20:45</td>
+              <td>manager@neolons.com</td>
+              <td><span class="action-badge suppression">Suppression</span></td>
+              <td>Campagne - Test_Campaign</td>
+              <td>Suppression de la campagne de test</td>
+              <td>192.168.1.110</td>
+              <td><span class="status-warning">Attention</span></td>
+            </tr>
+            <tr>
+              <td>2024-01-15 14:15:30</td>
+              <td>user2@neolons.com</td>
+              <td><span class="action-badge consultation">Consultation</span></td>
+              <td>Rapport - Statistiques_Q4</td>
+              <td>Consultation du rapport trimestriel</td>
+              <td>192.168.1.115</td>
+              <td><span class="status-success">Succès</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Section Traçabilité -->
+    <div class="audit-section">
+      <h2><i class="fas fa-route"></i> Traçabilité Complète</h2>
+      <div class="traceability-card">
+        <h3>Exemple de Traçabilité - Document "Contrat_2024.pdf"</h3>
+        <div class="timeline">
+          <div class="timeline-item">
+            <div class="timeline-marker creation"></div>
+            <div class="timeline-content">
+              <h4>Création</h4>
+              <p><strong>Date:</strong> 2024-01-15 14:30:25</p>
+              <p><strong>Utilisateur:</strong> admin@neolons.com</p>
+              <p><strong>Action:</strong> Upload du fichier initial</p>
+              <p><strong>Taille:</strong> 2.5 MB</p>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-marker modification"></div>
+            <div class="timeline-content">
+              <h4>Première Modification</h4>
+              <p><strong>Date:</strong> 2024-01-16 09:15:42</p>
+              <p><strong>Utilisateur:</strong> legal@neolons.com</p>
+              <p><strong>Action:</strong> Ajout d'annotations légales</p>
+              <p><strong>Version:</strong> 1.1</p>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-marker modification"></div>
+            <div class="timeline-content">
+              <h4>Validation</h4>
+              <p><strong>Date:</strong> 2024-01-17 16:45:18</p>
+              <p><strong>Utilisateur:</strong> manager@neolons.com</p>
+              <p><strong>Action:</strong> Validation et signature électronique</p>
+              <p><strong>Version:</strong> 1.2 (Finale)</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section Sécurité -->
+    <div class="audit-section">
+      <h2><i class="fas fa-lock"></i> Monitoring de Sécurité</h2>
+      <div class="security-grid">
+        <div class="security-card">
+          <h3><i class="fas fa-user-shield"></i> Connexions Suspectes</h3>
+          <div class="metric">
+            <span class="number">3</span>
+            <span class="label">Tentatives échouées</span>
+          </div>
+          <p>Dernière: 192.168.1.200 - 14:45</p>
+        </div>
+        <div class="security-card">
+          <h3><i class="fas fa-key"></i> Sessions Actives</h3>
+          <div class="metric">
+            <span class="number">12</span>
+            <span class="label">Utilisateurs connectés</span>
+          </div>
+          <p>Pic journalier: 18 utilisateurs</p>
+        </div>
+        <div class="security-card">
+          <h3><i class="fas fa-exclamation-triangle"></i> Alertes Sécurité</h3>
+          <div class="metric">
+            <span class="number">1</span>
+            <span class="label">Alerte active</span>
+          </div>
+          <p>Accès non autorisé détecté</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section Statistiques -->
+    <div class="audit-section">
+      <h2><i class="fas fa-chart-bar"></i> Statistiques d'Audit</h2>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <h3>Actions Aujourd'hui</h3>
+          <div class="stat-number">247</div>
+          <div class="stat-breakdown">
+            <div class="stat-item">
+              <span class="stat-label">Créations:</span>
+              <span class="stat-value">45</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Modifications:</span>
+              <span class="stat-value">128</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Suppressions:</span>
+              <span class="stat-value">12</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Consultations:</span>
+              <span class="stat-value">62</span>
+            </div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <h3>Utilisateurs Actifs</h3>
+          <div class="stat-number">34</div>
+          <div class="stat-breakdown">
+            <div class="stat-item">
+              <span class="stat-label">Administrateurs:</span>
+              <span class="stat-value">3</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Managers:</span>
+              <span class="stat-value">8</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Utilisateurs:</span>
+              <span class="stat-value">23</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
