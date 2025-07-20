@@ -1,1 +1,317 @@
-<h2 style="text-align: center">Tableau de bord</h2>
+<div class="admin-dashboard">
+  <div class="dashboard-header">
+    <h1><i class="fas fa-tachometer-alt"></i> Tableau de Bord Administrateur</h1>
+    <div class="last-update">      <i class="fas fa-clock"></i> Dernière mise à jour: {{ currentDate | date:
+'dd/MM/yyyy HH:mm' }}
+    </div>
+  </div>
+
+  <!-- Métriques principales -->
+  <div class="metrics-grid">
+    <div class="metric-card primary">
+      <div class="metric-icon">
+        <i class="fas fa-users"></i>
+      </div>
+      <div class="metric-content">
+        <h3>{{ totalUsers }}</h3>
+        <p>Utilisateurs Total</p>
+        <span class="metric-change positive">+{{ userStats.newUsersThisMonth }} ce mois</span>
+      </div>
+    </div>
+
+    <div class="metric-card success">
+      <div class="metric-icon">
+        <i class="fas fa-user-check"></i>
+      </div>
+      <div class="metric-content">
+        <h3>{{ activeUsers }}</h3>
+        <p>Utilisateurs Actifs</p>
+        <span class="metric-change">{{ userStats.activeSessionsToday }} sessions aujourd'hui</span>
+      </div>
+    </div>
+
+    <div class="metric-card info">
+      <div class="metric-icon">
+        <i class="fas fa-file-alt"></i>
+      </div>
+      <div class="metric-content">
+        <h3>{{ totalDocuments }}</h3>
+        <p>Documents</p>
+        <span class="metric-change positive">+{{ auditStats.creations }} aujourd'hui</span>
+      </div>
+    </div>
+
+    <div class="metric-card warning">
+      <div class="metric-icon">
+        <i class="fas fa-key"></i>
+      </div>
+      <div class="metric-content">
+        <h3>{{ licenseStats.activeLicenses }}/{{ licenseStats.totalLicenses }}</h3>
+        <p>Licences Actives</p>
+        <span class="metric-change negative">{{ licenseStats.expiringSoon }} expirent bientôt</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Analyses détaillées -->
+  <div class="analysis-grid">
+    
+    <!-- Gestion des Utilisateurs -->
+    <div class="analysis-card">
+      <div class="card-header">
+        <h2><i class="fas fa-users-cog"></i> Analyse Gestion Utilisateurs</h2>
+      </div>
+      <div class="card-content">
+        <div class="user-breakdown">
+          <div class="breakdown-item">
+            <span class="label">Administrateurs:</span>
+            <span class="value">{{ userStats.administrators }}</span>
+            <div class="progress-bar">
+              <div class="progress" [style.width.%]="(userStats.administrators / totalUsers) * 100"></div>
+            </div>
+          </div>
+          <div class="breakdown-item">
+            <span class="label">Managers:</span>
+            <span class="value">{{ userStats.managers }}</span>
+            <div class="progress-bar">
+              <div class="progress" [style.width.%]="(userStats.managers / totalUsers) * 100"></div>
+            </div>
+          </div>
+          <div class="breakdown-item">
+            <span class="label">Utilisateurs Standard:</span>
+            <span class="value">{{ userStats.standardUsers }}</span>
+            <div class="progress-bar">
+              <div class="progress" [style.width.%]="(userStats.standardUsers / totalUsers) * 100"></div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="user-activity-chart">
+          <h3>Activité Utilisateurs (7 derniers jours)</h3>
+          <div class="chart-container">
+            <div class="chart-bars">
+              <div *ngFor="let day of userActivityData" class="chart-bar">
+                <div class="bar" [style.height.%]="(day.value / 70) * 100"></div>
+                <span class="bar-label">{{ day.name }}</span>
+                <span class="bar-value">{{ day.value }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Analyse Journalisation -->
+    <div class="analysis-card">
+      <div class="card-header">
+        <h2><i class="fas fa-clipboard-list"></i> Analyse Journalisation</h2>
+      </div>
+      <div class="card-content">
+        <div class="audit-summary">
+          <div class="summary-item">
+            <div class="summary-icon creation">
+              <i class="fas fa-plus"></i>
+            </div>
+            <div class="summary-details">
+              <h4>{{ auditStats.creations }}</h4>
+              <p>Créations</p>
+            </div>
+          </div>
+          <div class="summary-item">
+            <div class="summary-icon modification">
+              <i class="fas fa-edit"></i>
+            </div>
+            <div class="summary-details">
+              <h4>{{ auditStats.modifications }}</h4>
+              <p>Modifications</p>
+            </div>
+          </div>
+          <div class="summary-item">
+            <div class="summary-icon deletion">
+              <i class="fas fa-trash"></i>
+            </div>
+            <div class="summary-details">
+              <h4>{{ auditStats.deletions }}</h4>
+              <p>Suppressions</p>
+            </div>
+          </div>
+          <div class="summary-item">
+            <div class="summary-icon consultation">
+              <i class="fas fa-eye"></i>
+            </div>
+            <div class="summary-details">
+              <h4>{{ auditStats.consultations }}</h4>
+              <p>Consultations</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="security-alerts">
+          <h3>Alertes Sécurité</h3>
+          <div class="alert-item" *ngIf="auditStats.securityAlerts > 0">
+            <i class="fas fa-exclamation-triangle"></i>
+            <span>{{ auditStats.securityAlerts }} alertes de sécurité actives</span>
+          </div>
+          <div class="alert-item" *ngIf="auditStats.failedLogins > 0">
+            <i class="fas fa-user-times"></i>
+            <span>{{ auditStats.failedLogins }} tentatives de connexion échouées</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Analyse Licences -->
+    <div class="analysis-card">
+      <div class="card-header">
+        <h2><i class="fas fa-certificate"></i> Analyse Licences</h2>
+      </div>
+      <div class="card-content">
+        <div class="license-overview">
+          <div class="license-circle">
+            <div class="circle-progress" [style.background]="'conic-gradient(#10B981 0deg ' + (licenseStats.utilizationRate * 3.6) + 'deg, #E5E7EB ' + (licenseStats.utilizationRate * 3.6) + 'deg 360deg)'">
+              <div class="circle-inner">
+                <span class="percentage">{{ licenseStats.utilizationRate }}%</span>
+                <span class="label">Utilisation</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="license-details">
+            <div class="detail-item">
+              <span class="detail-label">Licences Actives:</span>
+              <span class="detail-value active">{{ licenseStats.activeLicenses }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Expirent Bientôt:</span>
+              <span class="detail-value warning">{{ licenseStats.expiringSoon }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Expirées:</span>
+              <span class="detail-value expired">{{ licenseStats.expired }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Disponibles:</span>
+              <span class="detail-value available">{{ licenseStats.totalLicenses - licenseStats.activeLicenses }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Activités Récentes -->
+    <div class="analysis-card full-width">
+      <div class="card-header">
+        <h2><i class="fas fa-history"></i> Activités Récentes</h2>
+      </div>
+      <div class="card-content">
+        <div class="activities-table">
+          <table>
+            <thead>
+              <tr>
+                <th>Utilisateur</th>
+                <th>Action</th>
+                <th>Ressource</th>
+                <th>Heure</th>
+                <th>Statut</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let activity of recentActivities">
+                <td>{{ activity.user }}</td>
+                <td>{{ activity.action }}</td>
+                <td>{{ activity.resource }}</td>
+                <td>{{ activity.time }}</td>
+                <td>
+                  <span [class]="getStatusClass(activity.status)">
+                    {{ activity.status === 'success' ? 'Succès' : activity.status === 'failed' ? 'Échec' : activity.status }}
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Santé du Système -->
+    <div class="analysis-card">
+      <div class="card-header">
+        <h2><i class="fas fa-server"></i> Santé du Système</h2>
+      </div>
+      <div class="card-content">
+        <div class="system-metrics">
+          <div class="metric-item">
+            <div class="metric-label">
+              <i class="fas fa-microchip"></i>
+              <span>CPU</span>
+            </div>
+            <div class="metric-bar">
+              <div class="bar-fill" [style.width.%]="systemHealth.cpu" [class]="getHealthStatus(systemHealth.cpu)"></div>
+            </div>
+            <span class="metric-percentage">{{ systemHealth.cpu }}%</span>
+          </div>
+
+          <div class="metric-item">
+            <div class="metric-label">
+              <i class="fas fa-memory"></i>
+              <span>Mémoire</span>
+            </div>
+            <div class="metric-bar">
+              <div class="bar-fill" [style.width.%]="systemHealth.memory" [class]="getHealthStatus(systemHealth.memory)"></div>
+            </div>
+            <span class="metric-percentage">{{ systemHealth.memory }}%</span>
+          </div>
+
+          <div class="metric-item">
+            <div class="metric-label">
+              <i class="fas fa-hdd"></i>
+              <span>Stockage</span>
+            </div>
+            <div class="metric-bar">
+              <div class="bar-fill" [style.width.%]="systemHealth.storage" [class]="getHealthStatus(systemHealth.storage)"></div>
+            </div>
+            <span class="metric-percentage">{{ systemHealth.storage }}%</span>
+          </div>
+
+          <div class="metric-item">
+            <div class="metric-label">
+              <i class="fas fa-wifi"></i>
+              <span>Réseau</span>
+            </div>
+            <div class="metric-bar">
+              <div class="bar-fill" [style.width.%]="systemHealth.network" [class]="getHealthStatus(systemHealth.network)"></div>
+            </div>
+            <span class="metric-percentage">{{ systemHealth.network }}%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions Rapides -->
+    <div class="analysis-card">
+      <div class="card-header">
+        <h2><i class="fas fa-bolt"></i> Actions Rapides</h2>
+      </div>
+      <div class="card-content">
+        <div class="quick-actions">
+          <button class="action-btn primary" routerLink="/gestion-utilisateur">
+            <i class="fas fa-user-plus"></i>
+            <span>Ajouter Utilisateur</span>
+          </button>
+          <button class="action-btn success" routerLink="/audit-suivi">
+            <i class="fas fa-search"></i>
+            <span>Voir Journalisation</span>
+          </button>
+          <button class="action-btn warning" routerLink="/gestion-licences">
+            <i class="fas fa-key"></i>
+            <span>Gérer Licences</span>
+          </button>
+          <button class="action-btn info" routerLink="/administration">
+            <i class="fas fa-cogs"></i>
+            <span>Administration</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
