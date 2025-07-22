@@ -1,0 +1,186 @@
+<div class="diff-viewer-container" *ngIf="auditLog">
+  <!-- Header -->
+  <div class="diff-header">
+    <div class="diff-info">
+      <h3><i class="fas fa-code-branch"></i> Détails des Modifications</h3>
+      <div class="diff-meta">
+        <span class="meta-item">
+          <i class="fas fa-user"></i>
+          {{ auditLog.username }}
+        </span>
+        <span class="meta-item">
+          <i class="fas fa-clock"></i>
+          {{ auditLog.timestamp | date:'dd/MM/yyyy HH:mm:ss' }}
+        </span>
+        <span class="meta-item">
+          <i class="fas fa-cube"></i>
+          {{ auditLog.resourceType }} ({{ auditLog.resourceId }})
+        </span>
+      </div>
+    </div>
+    
+    <div class="diff-controls">
+      <div class="view-mode-toggle">
+        <button 
+          (click)="toggleViewMode()" 
+          class="btn btn-outline-secondary"
+          [title]="viewMode === 'side-by-side' ? 'Vue unifiée' : 'Vue côte à côte'">
+          <i class="fas" [ngClass]="viewMode === 'side-by-side' ? 'fa-columns' : 'fa-align-left'"></i>
+          {{ viewMode === 'side-by-side' ? 'Côte à côte' : 'Unifié' }}
+        </button>
+      </div>
+      
+      <div class="expand-controls">
+        <button (click)="expandAll()" class="btn btn-outline-primary">
+          <i class="fas fa-expand-alt"></i> Tout développer
+        </button>
+        <button (click)="collapseAll()" class="btn btn-outline-primary">
+          <i class="fas fa-compress-alt"></i> Tout réduire
+        </button>
+      </div>
+      
+      <button (click)="exportDiff()" class="btn btn-primary">
+        <i class="fas fa-download"></i> Exporter
+      </button>
+    </div>
+  </div>
+
+  <!-- Summary -->
+  <div class="diff-summary">
+    <div class="summary-stats">
+      <div class="stat-item added">
+        <i class="fas fa-plus"></i>
+        <span>{{ getChangeSummary().added }} ajouté(s)</span>
+      </div>
+      <div class="stat-item modified">
+        <i class="fas fa-edit"></i>
+        <span>{{ getChangeSummary().modified }} modifié(s)</span>
+      </div>
+      <div class="stat-item removed">
+        <i class="fas fa-minus"></i>
+        <span>{{ getChangeSummary().removed }} supprimé(s)</span>
+      </div>
+    </div>
+    
+    <div class="action-badge" [ngClass]="'action-' + auditLog.action.toLowerCase()">
+      {{ auditLog.action }}
+    </div>
+  </div>
+
+  <!-- Changes List -->
+  <div class="changes-container">
+    <div class="change-item" 
+         *ngFor="let change of changes" 
+         [ngClass]="getChangeTypeClass(change)">
+      
+      <!-- Change Header -->
+      <div class="change-header" (click)="toggleChange(change.id)">
+        <div class="change-field">
+          <i class="fas" [ngClass]="getChangeIcon(change)"></i>
+          <span class="field-name">{{ getFieldDisplayName(change.fieldName) }}</span>
+          <span class="field-type">{{ change.dataType }}</span>
+          <span class="critical-badge" *ngIf="isCriticalField(change.fieldName)">
+            <i class="fas fa-exclamation-triangle"></i> Critique
+          </span>
+        </div>
+        
+        <div class="change-preview" *ngIf="!isExpanded(change.id)">
+          <span class="preview-old">{{ getValuePreview(change.oldValue) }}</span>
+          <i class="fas fa-arrow-right"></i>
+          <span class="preview-new">{{ getValuePreview(change.newValue) }}</span>
+        </div>
+        
+        <div class="expand-toggle">
+          <i class="fas" [ngClass]="isExpanded(change.id) ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+        </div>
+      </div>
+
+      <!-- Change Content -->
+      <div class="change-content" *ngIf="isExpanded(change.id)">
+        
+        <!-- Side by Side View -->
+        <div class="diff-side-by-side" *ngIf="viewMode === 'side-by-side'">
+          <div class="diff-column old-column">
+            <div class="column-header">
+              <i class="fas fa-minus-circle"></i>
+              Ancienne valeur
+            </div>
+            <div class="column-content">
+              <pre class="diff-content">{{ formatValue(change.oldValue, change.dataType) }}</pre>
+            </div>
+          </div>
+          
+          <div class="diff-column new-column">
+            <div class="column-header">
+              <i class="fas fa-plus-circle"></i>
+              Nouvelle valeur
+            </div>
+            <div class="column-content">
+              <pre class="diff-content">{{ formatValue(change.newValue, change.dataType) }}</pre>
+            </div>
+          </div>
+        </div>
+
+        <!-- Unified View -->
+        <div class="diff-unified" *ngIf="viewMode === 'unified'">
+          <div class="unified-old" *ngIf="change.oldValue">
+            <div class="line-indicator">-</div>
+            <div class="line-content" [innerHTML]="highlightDifferences(change.oldValue, change.newValue).old"></div>
+          </div>
+          <div class="unified-new" *ngIf="change.newValue">
+            <div class="line-indicator">+</div>
+            <div class="line-content" [innerHTML]="highlightDifferences(change.oldValue, change.newValue).new"></div>
+          </div>
+        </div>
+
+        <!-- Change Metadata -->
+        <div class="change-metadata">
+          <div class="metadata-item">
+            <i class="fas fa-clock"></i>
+            <span>{{ change.timestamp | date:'dd/MM/yyyy HH:mm:ss' }}</span>
+          </div>
+          <div class="metadata-item" *ngIf="change.dataType">
+            <i class="fas fa-tag"></i>
+            <span>Type: {{ change.dataType }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- No Changes -->
+  <div class="no-changes" *ngIf="changes.length === 0">
+    <i class="fas fa-info-circle"></i>
+    <p>Aucune modification détaillée disponible pour cette action.</p>
+    <small>Les détails peuvent ne pas être disponibles pour certains types d'actions ou d'anciennes entrées.</small>
+  </div>
+
+  <!-- Additional Context -->
+  <div class="additional-context" *ngIf="auditLog.details">
+    <h4><i class="fas fa-info-circle"></i> Contexte Additionnel</h4>
+    <div class="context-content">
+      <pre>{{ auditLog.details }}</pre>
+    </div>
+  </div>
+
+  <!-- Risk Assessment -->
+  <div class="risk-assessment" *ngIf="auditLog.riskLevel">
+    <h4><i class="fas fa-shield-alt"></i> Évaluation du Risque</h4>
+    <div class="risk-content">
+      <div class="risk-level" [ngClass]="'risk-' + auditLog.riskLevel.toLowerCase()">
+        <i class="fas fa-exclamation-triangle"></i>
+        {{ auditLog.riskLevel }}
+      </div>
+      <div class="risk-factors" *ngIf="auditLog.tags && auditLog.tags.length > 0">
+        <span class="risk-tag" *ngFor="let tag of auditLog.tags">{{ tag }}</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Empty State -->
+<div class="empty-state" *ngIf="!auditLog">
+  <i class="fas fa-search"></i>
+  <p>Sélectionnez un log d'audit pour voir les détails des modifications</p>
+</div>
+

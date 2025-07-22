@@ -1,0 +1,199 @@
+<div class="audit-container">
+  <div class="page-header">
+    <h1><i class="fas fa-clipboard-list"></i> Module d'Audit</h1>
+    <p>Surveillance et traçabilité des actions système</p>
+  </div>
+
+  <!-- Tableau de bord des statistiques -->
+  <div class="dashboard-stats" *ngIf="dashboardStats">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon">
+          <i class="fas fa-list-alt"></i>
+        </div>
+        <div class="stat-content">
+          <h3>{{ dashboardStats.totalLogs }}</h3>
+          <p>Total des logs</p>
+        </div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-icon">
+          <i class="fas fa-clock"></i>
+        </div>
+        <div class="stat-content">
+          <h3>{{ dashboardStats.logsLast24h }}</h3>
+          <p>Logs 24h</p>
+        </div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-icon">
+          <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <div class="stat-content">
+          <h3>{{ dashboardStats.failedLogsLast24h }}</h3>
+          <p>Échecs 24h</p>
+        </div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-icon">
+          <i class="fas fa-users"></i>
+        </div>
+        <div class="stat-content">
+          <h3>{{ dashboardStats.activeUsersLast24h }}</h3>
+          <p>Utilisateurs actifs</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filtres -->
+  <div class="filters-section">
+    <h3><i class="fas fa-filter"></i> Filtres</h3>
+    <div class="filters-grid">
+      <div class="filter-group">
+        <label for="action-filter">Action</label>
+        <select id="action-filter" [(ngModel)]="selectedAction" class="form-control">
+          <option value="">Toutes les actions</option>
+          <option *ngFor="let action of actions" [value]="action">{{ action }}</option>
+        </select>
+      </div>
+      
+      <div class="filter-group">
+        <label for="resource-filter">Type de ressource</label>
+        <select id="resource-filter" [(ngModel)]="selectedResourceType" class="form-control">
+          <option value="">Tous les types</option>
+          <option *ngFor="let type of resourceTypes" [value]="type">{{ type }}</option>
+        </select>
+      </div>
+      
+      <div class="filter-group">
+        <label for="user-filter">Utilisateur</label>
+        <input id="user-filter" type="text" [(ngModel)]="selectedUser" 
+               placeholder="Nom ou ID utilisateur" class="form-control">
+      </div>
+      
+      <div class="filter-group">
+        <label for="date-from">Date de début</label>
+        <input id="date-from" type="date" [(ngModel)]="dateFrom" class="form-control">
+      </div>
+      
+      <div class="filter-group">
+        <label for="date-to">Date de fin</label>
+        <input id="date-to" type="date" [(ngModel)]="dateTo" class="form-control">
+      </div>
+      
+      <div class="filter-actions">
+        <button (click)="clearFilters()" class="btn btn-secondary">
+          <i class="fas fa-times"></i> Effacer
+        </button>
+        <button (click)="exportLogs()" class="btn btn-primary">
+          <i class="fas fa-download"></i> Exporter
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tableau des logs d'audit -->
+  <div class="logs-section">
+    <div class="section-header">
+      <h3><i class="fas fa-list"></i> Logs d'Audit</h3>
+      <div class="logs-info">
+        <span>{{ applyFilters().length }} résultat(s)</span>
+      </div>
+    </div>
+
+    <div class="table-container" *ngIf="!loading">
+      <table class="audit-table">
+        <thead>
+          <tr>
+            <th>Date/Heure</th>
+            <th>Utilisateur</th>
+            <th>Action</th>
+            <th>Ressource</th>
+            <th>Détails</th>
+            <th>IP</th>
+            <th>Statut</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let log of paginatedLogs" class="log-row">
+            <td class="timestamp">
+              {{ log.timestamp | date:'dd/MM/yyyy HH:mm:ss' }}
+            </td>
+            <td class="user">
+              <div class="user-info">
+                <strong>{{ log.username }}</strong>
+                <small>{{ log.userId }}</small>
+              </div>
+            </td>
+            <td class="action">
+              <span class="action-badge" [ngClass]="getActionClass(log.action)">
+                {{ log.action }}
+              </span>
+            </td>
+            <td class="resource">
+              <div class="resource-info">
+                <strong>{{ log.resourceType }}</strong>
+                <small>{{ log.resourceId }}</small>
+              </div>
+            </td>
+            <td class="details">
+              <span [title]="log.details">{{ log.details | slice:0:50 }}{{ log.details.length > 50 ? '...' : '' }}</span>
+            </td>
+            <td class="ip">{{ log.ipAddress }}</td>
+            <td class="status">
+              <span class="status-badge" [ngClass]="getStatusClass(log.success)">
+                <i class="fas" [ngClass]="log.success ? 'fa-check' : 'fa-times'"></i>
+                {{ log.success ? 'Succès' : 'Échec' }}
+              </span>
+              <div *ngIf="!log.success && log.errorMessage" class="error-message">
+                {{ log.errorMessage }}
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination" *ngIf="totalPages > 1">
+      <button (click)="previousPage()" [disabled]="currentPage === 1" class="btn btn-secondary">
+        <i class="fas fa-chevron-left"></i> Précédent
+      </button>
+      <span class="page-info">
+        Page {{ currentPage }} sur {{ totalPages }}
+      </span>
+      <button (click)="nextPage()" [disabled]="currentPage === totalPages" class="btn btn-secondary">
+        Suivant <i class="fas fa-chevron-right"></i>
+      </button>
+    </div>
+
+    <!-- État de chargement -->
+    <div class="loading-state" *ngIf="loading">
+      <i class="fas fa-spinner fa-spin"></i>
+      <p>Chargement des données d'audit...</p>
+    </div>
+
+    <!-- État d'erreur -->
+    <div class="error-state" *ngIf="error">
+      <i class="fas fa-exclamation-triangle"></i>
+      <p>{{ error }}</p>
+      <button (click)="loadAuditLogs()" class="btn btn-primary">
+        <i class="fas fa-redo"></i> Réessayer
+      </button>
+    </div>
+
+    <!-- Aucun résultat -->
+    <div class="empty-state" *ngIf="!loading && !error && paginatedLogs.length === 0">
+      <i class="fas fa-search"></i>
+      <p>Aucun log d'audit trouvé avec les filtres actuels</p>
+      <button (click)="clearFilters()" class="btn btn-secondary">
+        <i class="fas fa-times"></i> Effacer les filtres
+      </button>
+    </div>
+  </div>
+</div>
+

@@ -2,6 +2,7 @@ package com.neo.app.controller;
 
 import com.neo.app.documents.AuditLogEntity;
 import com.neo.app.service.AuditLogService;
+import com.neo.app.service.DashboardStats;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -157,6 +158,33 @@ public class AuditLogController {
         try {
             long count = auditLogService.countActionsByUser(userId);
             return ResponseEntity.ok(count);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    /**
+     * Initialise des données d'audit de test
+     */
+    @PostMapping("/initialize-test-data")
+    public ResponseEntity<String> initializeTestData() {
+        try {
+            auditLogService.initializeTestAuditData();
+            return ResponseEntity.ok("Données d'audit de test initialisées avec succès");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Erreur lors de l'initialisation des données de test: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Obtient les statistiques du tableau de bord
+     */
+    @GetMapping("/dashboard-stats")
+    public ResponseEntity<DashboardStats> getDashboardStats() {
+        try {
+            DashboardStats stats = auditLogService.getDashboardStats();
+            return ResponseEntity.ok(stats);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }

@@ -21,9 +21,10 @@
         <a href="#" [class.active]="currentView === 'licenses'" (click)="setCurrentView('licenses')">
           <i class="fas fa-id-card icon"></i> Licences
         </a>
-        <a href="#" [class.active]="currentView === 'audit-suivi'" (click)="setCurrentView('audit-suivi')">
-          <i class="fas fa-shield-alt icon"></i> Journalisation & sécurité
+        <a href="#" [class.active]="currentView === 'audit'" (click)="setCurrentView('audit')">
+          <i class="fas fa-clipboard-list icon"></i> Journalisation et Audit
         </a>
+       
       </div>
     </div>
 
@@ -144,6 +145,7 @@
       <app-gestion-utilisateur *ngIf="currentView === 'users'"></app-gestion-utilisateur>
       <app-gestion-roles *ngIf="currentView === 'roles'"></app-gestion-roles>
       <app-gestion-licences *ngIf="currentView === 'licenses'"></app-gestion-licences>
+      <app-audit *ngIf="currentView === 'audit'"></app-audit>
       <app-audit-suivi *ngIf="currentView === 'audit-suivi'"></app-audit-suivi>
       <app-administration *ngIf="currentView === 'admin'"></app-administration>
       <app-gestion-camp *ngIf="currentView === 'camp'"></app-gestion-camp>

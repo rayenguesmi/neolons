@@ -17,6 +17,7 @@ import { GestionDocComponent } from './gestion-doc/gestion-doc.component';
 import { GestionExecComponent } from './gestion-exec/gestion-exec.component';
 import { LandingComponent } from './landing/landing.component';
 import { AuditSuiviComponent } from './audit-suivi/audit-suivi.component';
+import { AuditComponent } from './audit/audit.component';
 import { AuthGuard } from './AuthGuard';
 import { initializeKeycloak } from './KeycloakInitService';
 @NgModule({
@@ -31,7 +32,8 @@ import { initializeKeycloak } from './KeycloakInitService';
     GestionDocComponent,
     GestionExecComponent,
     LandingComponent,
-    AuditSuiviComponent
+    AuditSuiviComponent,
+    AuditComponent
   ],
   imports: [
     BrowserModule,

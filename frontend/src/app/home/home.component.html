@@ -294,19 +294,19 @@
       </div>
       <div class="card-content">
         <div class="quick-actions">
-          <button class="action-btn primary" routerLink="/gestion-utilisateur">
+          <button class="action-btn primary" routerLink="/gestion-utilisateur" (click)="onQuickActionUsed('Gestion Utilisateur')">
             <i class="fas fa-user-plus"></i>
             <span>Ajouter Utilisateur</span>
           </button>
-          <button class="action-btn success" routerLink="/audit-suivi">
+          <button class="action-btn success" routerLink="/audit-suivi" (click)="onQuickActionUsed('Audit et Suivi')">
             <i class="fas fa-search"></i>
             <span>Voir Journalisation</span>
           </button>
-          <button class="action-btn warning" routerLink="/gestion-licences">
+          <button class="action-btn warning" routerLink="/gestion-licences" (click)="onQuickActionUsed('Gestion Licences')">
             <i class="fas fa-key"></i>
             <span>Gérer Licences</span>
           </button>
-          <button class="action-btn info" routerLink="/administration">
+          <button class="action-btn info" routerLink="/administration" (click)="onQuickActionUsed('Administration')">
             <i class="fas fa-cogs"></i>
             <span>Administration</span>
           </button>

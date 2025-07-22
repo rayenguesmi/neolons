@@ -71,5 +71,21 @@ public interface AuditLogRepository extends MongoRepository<AuditLogEntity, Stri
 
     @Query(value = "{'projectId': ?0, 'timestamp': {'$gte': ?1, '$lte': ?2}}", count = true)
     long countByProjectIdAndTimestampBetween(String projectId, Date startDate, Date endDate);
+
+    // Nouvelles méthodes pour les statistiques du tableau de bord
+    @Query(value = "{'timestamp': {'$gte': ?0}}", count = true)
+    long countByTimestampAfter(Date date);
+
+    @Query(value = "{'timestamp': {'$gte': ?0}}", fields = "{'userId': 1}")
+    long countDistinctUsersByTimestampAfter(Date date);
+
+    // Méthodes pour obtenir les actions les plus fréquentes (simulation avec des données par défaut)
+    @Query("{'action': {'$exists': true}}")
+    List<AuditLogEntity> findMostFrequentActions();
+    List<AuditLogEntity> findByRiskLevel(String riskLevel);
+
+    // Méthodes pour obtenir les types de ressources les plus accédés
+    @Query("{'resourceType': {'$exists': true}}")
+    List<AuditLogEntity> findMostAccessedResourceTypes();
 }
 

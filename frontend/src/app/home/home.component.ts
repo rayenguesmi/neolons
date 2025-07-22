@@ -1,47 +1,57 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { DashboardService, DashboardStats } from '../services/dashboard.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-home',
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css']
 })
-export class HomeComponent implements OnInit {
+export class HomeComponent implements OnInit, OnDestroy {
 
   currentDate: Date = new Date();
+  private dashboardSubscription: Subscription = new Subscription();
 
-  // Statistiques générales
-  totalUsers = 156;
-  activeUsers = 89;
-  totalDocuments = 2847;
-  totalCampaigns = 45;
+  // Statistiques générales - maintenant dynamiques
+  totalUsers = 0;
+  activeUsers = 0;
+  totalDocuments = 0;
+  totalCampaigns = 0;
   
-  // Données de gestion des utilisateurs
+  // Données de gestion des utilisateurs - maintenant dynamiques
   userStats = {
-    administrators: 8,
-    managers: 23,
-    standardUsers: 125,
-    newUsersThisMonth: 12,
-    activeSessionsToday: 67
+    administrators: 0,
+    managers: 0,
+    standardUsers: 0,
+    newUsersThisMonth: 0,
+    activeSessionsToday: 0
   };
 
-  // Données de journalisation
+  // Données de journalisation - maintenant dynamiques
   auditStats = {
-    totalActionsToday: 247,
-    creations: 45,
-    modifications: 128,
-    deletions: 12,
-    consultations: 62,
-    securityAlerts: 3,
-    failedLogins: 8
+    totalActionsToday: 0,
+    creations: 0,
+    modifications: 0,
+    deletions: 0,
+    consultations: 0,
+    securityAlerts: 0,
+    failedLogins: 0
   };
 
-  // Données de licences
+  // Données de licences - maintenant dynamiques
   licenseStats = {
-    totalLicenses: 200,
-    activeLicenses: 156,
-    expiringSoon: 15,
-    expired: 8,
-    utilizationRate: 78
+    totalLicenses: 0,
+    activeLicenses: 0,
+    expiringSoon: 0,
+    expired: 0,
+    utilizationRate: 0
+  };
+
+  // Nouvelles données de rôles - dynamiques
+  roleStats = {
+    totalRoles: 0,
+    activeRoles: 0,
+    customRoles: 0
   };
 
   // Données pour les graphiques
@@ -78,7 +88,7 @@ export class HomeComponent implements OnInit {
       status: 'success'
     },
     {
-      user: 'user@neolons.com',
+      user: 'eya@neolons.com',
       action: 'Consultation rapport',
       resource: 'Stats_Q4.pdf',
       time: '14:20',
@@ -100,22 +110,85 @@ export class HomeComponent implements OnInit {
     network: 89
   };
 
-  constructor() { }
+  constructor(private dashboardService: DashboardService) { }
 
   ngOnInit(): void {
+    // S'abonner aux changements des statistiques du dashboard
+    this.dashboardSubscription = this.dashboardService.dashboardStats$.subscribe(
+      (stats: DashboardStats) => {
+        this.updateDashboardData(stats);
+      }
+    );
+
     // Simulation de mise à jour des données en temps réel
     setInterval(() => {
       this.updateRealTimeData();
     }, 30000); // Mise à jour toutes les 30 secondes
+
+    // Mise à jour de l'activité utilisateur toutes les 10 secondes
+    setInterval(() => {
+      this.dashboardService.updateActiveUsers();
+    }, 10000);
+  }
+
+  ngOnDestroy(): void {
+    // Se désabonner pour éviter les fuites mémoire
+    if (this.dashboardSubscription) {
+      this.dashboardSubscription.unsubscribe();
+    }
+  }
+
+  private updateDashboardData(stats: DashboardStats): void {
+    this.totalUsers = stats.totalUsers;
+    this.activeUsers = stats.activeUsers;
+    this.totalDocuments = stats.totalDocuments;
+    this.totalCampaigns = stats.totalCampaigns;
+    this.userStats = { ...stats.userStats };
+    this.auditStats = { ...stats.auditStats };
+    this.licenseStats = { ...stats.licenseStats };
+    this.roleStats = { ...stats.roleStats };
   }
 
   updateRealTimeData(): void {
     // Simulation de nouvelles données
     this.currentDate = new Date();
-    this.activeUsers = Math.floor(Math.random() * 20) + 80;
-    this.auditStats.totalActionsToday += Math.floor(Math.random() * 5);
     this.systemHealth.cpu = Math.floor(Math.random() * 30) + 30;
     this.systemHealth.memory = Math.floor(Math.random() * 40) + 50;
+    this.systemHealth.storage = Math.floor(Math.random() * 20) + 20;
+    this.systemHealth.network = Math.floor(Math.random() * 15) + 85;
+    
+    // Mise à jour des graphiques d'activité utilisateur
+    this.updateUserActivityChart();
+  }
+
+  private updateUserActivityChart(): void {
+    // Simulation de nouvelles données d'activité
+    this.userActivityData = this.userActivityData.map(day => ({
+      ...day,
+      value: Math.max(10, Math.floor(Math.random() * 50) + 20)
+    }));
+  }
+
+  // Méthodes pour les actions rapides avec mise à jour du dashboard
+  onQuickActionUsed(action: string): void {
+    // Enregistrer l'action dans les statistiques d'audit
+    const currentStats = this.dashboardService.getCurrentStats();
+    currentStats.auditStats.consultations++;
+    currentStats.auditStats.totalActionsToday++;
+    
+    // Ajouter une nouvelle activité récente
+    const newActivity = {
+      user: 'admin@neolons.com',
+      action: `Action rapide: ${action}`,
+      resource: action,
+      time: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
+      status: 'success'
+    };
+    
+    this.recentActivities.unshift(newActivity);
+    if (this.recentActivities.length > 10) {
+      this.recentActivities.pop();
+    }
   }
 
   getStatusClass(status: string): string {
@@ -133,3 +206,4 @@ export class HomeComponent implements OnInit {
     return 'critical';
   }
 }
+
