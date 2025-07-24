@@ -500,3 +500,247 @@
   }
 }
 
+/* Styles personnalisés pour SweetAlert2 - Design moderne */
+
+/* Popup principal */
+.swal2-modern-popup {
+  border-radius: 15px !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15) !important;
+  border: none !important;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+}
+
+/* Popup de danger spécial */
+.swal2-danger-popup {
+  border-left: 5px solid #dc3545 !important;
+}
+
+/* Titre moderne */
+.swal2-modern-title {
+  font-weight: 600 !important;
+  font-size: 1.5rem !important;
+  color: #2c3e50 !important;
+  margin-bottom: 1rem !important;
+}
+
+/* Contenu HTML personnalisé */
+.swal2-html-container {
+  font-size: 0.95rem !important;
+  line-height: 1.5 !important;
+  color: #495057 !important;
+}
+
+/* Alertes Bootstrap dans SweetAlert2 */
+.swal2-html-container .alert {
+  border-radius: 8px !important;
+  border: none !important;
+  font-size: 0.9rem !important;
+  padding: 0.75rem 1rem !important;
+  margin: 1rem 0 !important;
+}
+
+.swal2-html-container .alert-info {
+  background-color: #e3f2fd !important;
+  color: #1565c0 !important;
+  border-left: 4px solid #2196f3 !important;
+}
+
+.swal2-html-container .alert-danger {
+  background-color: #ffebee !important;
+  color: #c62828 !important;
+  border-left: 4px solid #f44336 !important;
+}
+
+/* Icônes personnalisées */
+.swal2-icon {
+  border: none !important;
+  margin: 1.5rem auto 1rem !important;
+}
+
+.swal2-icon.swal2-success {
+  color: #28a745 !important;
+}
+
+.swal2-icon.swal2-error {
+  color: #dc3545 !important;
+}
+
+.swal2-icon.swal2-warning {
+  color: #ffc107 !important;
+}
+
+.swal2-icon.swal2-info {
+  color: #17a2b8 !important;
+}
+
+.swal2-icon.swal2-question {
+  color: #6f42c1 !important;
+}
+
+/* Boutons personnalisés */
+.swal2-actions {
+  margin-top: 1.5rem !important;
+  gap: 0.75rem !important;
+}
+
+.swal2-styled.btn {
+  border-radius: 8px !important;
+  padding: 0.5rem 1.5rem !important;
+  font-weight: 500 !important;
+  font-size: 0.9rem !important;
+  border: none !important;
+  transition: all 0.2s ease !important;
+  min-width: 100px !important;
+}
+
+.btn-primary {
+  background-color: #007bff !important;
+  color: white !important;
+}
+
+.btn-primary:hover {
+  background-color: #0056b3 !important;
+  transform: translateY(-1px) !important;
+}
+
+.btn-success {
+  background-color: #28a745 !important;
+  color: white !important;
+}
+
+.btn-success:hover {
+  background-color: #1e7e34 !important;
+  transform: translateY(-1px) !important;
+}
+
+.btn-danger {
+  background-color: #dc3545 !important;
+  color: white !important;
+}
+
+.btn-danger:hover {
+  background-color: #c82333 !important;
+  transform: translateY(-1px) !important;
+}
+
+.btn-warning {
+  background-color: #ffc107 !important;
+  color: #212529 !important;
+}
+
+.btn-warning:hover {
+  background-color: #e0a800 !important;
+  transform: translateY(-1px) !important;
+}
+
+.btn-secondary {
+  background-color: #6c757d !important;
+  color: white !important;
+}
+
+.btn-secondary:hover {
+  background-color: #545b62 !important;
+  transform: translateY(-1px) !important;
+}
+
+/* Barre de progression du timer */
+.swal2-timer-progress-bar {
+  background: linear-gradient(90deg, #28a745, #20c997) !important;
+  height: 4px !important;
+}
+
+/* Animation de chargement */
+.swal2-loader {
+  border-color: #007bff transparent #007bff transparent !important;
+}
+
+/* Overlay */
+.swal2-backdrop-show {
+  background: rgba(0, 0, 0, 0.5) !important;
+  backdrop-filter: blur(3px) !important;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .swal2-modern-popup {
+    margin: 1rem !important;
+    max-width: calc(100% - 2rem) !important;
+  }
+  
+  .swal2-modern-title {
+    font-size: 1.25rem !important;
+  }
+  
+  .swal2-html-container {
+    font-size: 0.9rem !important;
+  }
+  
+  .swal2-styled.btn {
+    padding: 0.4rem 1rem !important;
+    font-size: 0.85rem !important;
+    min-width: 80px !important;
+  }
+}
+
+/* Animations personnalisées (nécessite Animate.css) */
+.animate__animated {
+  animation-duration: 0.5s !important;
+}
+
+.animate__fadeInDown {
+  animation-name: fadeInDown !important;
+}
+
+.animate__fadeOutUp {
+  animation-name: fadeOutUp !important;
+}
+
+.animate__bounceIn {
+  animation-name: bounceIn !important;
+}
+
+/* Focus et accessibilité */
+.swal2-styled:focus {
+  outline: 2px solid #007bff !important;
+  outline-offset: 2px !important;
+}
+
+/* Texte en petite taille */
+.swal2-html-container .small {
+  font-size: 0.8rem !important;
+  opacity: 0.8 !important;
+}
+
+/* Icônes FontAwesome dans le contenu */
+.swal2-html-container .fas,
+.swal2-html-container .far,
+.swal2-html-container .fab {
+  margin-right: 0.5rem !important;
+}
+
+/* Styles pour les éléments de statut */
+.text-success {
+  color: #28a745 !important;
+}
+
+.text-danger {
+  color: #dc3545 !important;
+}
+
+.text-warning {
+  color: #ffc107 !important;
+}
+
+.text-info {
+  color: #17a2b8 !important;
+}
+
+.text-muted {
+  color: #6c757d !important;
+}
+
+/* Amélioration de la lisibilité */
+.swal2-html-container strong {
+  font-weight: 600 !important;
+  color: #2c3e50 !important;
+}

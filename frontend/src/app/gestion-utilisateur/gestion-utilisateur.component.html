@@ -1,8 +1,10 @@
 <div class="user-management-container">
   <h2>Gestion des utilisateurs</h2>
 
-  <!-- Erreur -->
-  <div *ngIf="errorMessage" class="error">{{ errorMessage }}</div>
+  <!-- Affichage des erreurs -->
+  <div *ngIf="errorMessage" class="error-message">
+    {{ errorMessage }}
+  </div>
 
   <!-- Formulaire d'ajout -->
   <form (ngSubmit)="addUser()" #userForm="ngForm">
@@ -15,7 +17,7 @@
 
   <hr />
 
-  <!-- Tableau utilisateurs -->
+  <!-- Tableau utilisateurs avec trackBy -->
   <table class="user-table">
     <thead>
       <tr>
@@ -27,7 +29,7 @@
       </tr>
     </thead>
     <tbody>
-      <tr *ngFor="let user of users">
+      <tr *ngFor="let user of users; trackBy: trackByUserId">
         <td>{{ user.lastName }}</td>
         <td>{{ user.firstName }}</td>
         <td>{{ user.email }}</td>
@@ -41,4 +43,9 @@
       </tr>
     </tbody>
   </table>
+
+  <!-- Message si aucun utilisateur -->
+  <div *ngIf="users.length === 0" class="no-users">
+    Aucun utilisateur trouvé
+  </div>
 </div>

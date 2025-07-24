@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { License, LicenseService, LicenseStatistics, LicenseValidationResult } from '../services/license.service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-gestion-licences',
@@ -168,19 +169,78 @@ export class GestionLicencesComponent implements OnInit {
   }
 
   deleteLicense(license: License): void {
-    if (confirm(`Êtes-vous sûr de vouloir supprimer la licence "${license.licenseName}" ?`)) {
-      this.licenseService.deleteLicense(license.id!).subscribe({
-        next: () => {
-          this.showMessage('Licence supprimée avec succès', 'success');
-          this.loadLicenses();
-          this.loadStatistics();
-        },
-        error: (error) => {
-          this.showMessage('Erreur lors de la suppression de la licence', 'error');
-          console.error('Erreur:', error);
-        }
-      });
-    }
+    Swal.fire({
+      title: 'Confirmer la suppression',
+      html: `
+        <div class="text-center">
+          <div class="mb-3">
+            <i class="fas fa-exclamation-triangle text-warning" style="font-size: 3rem;"></i>
+          </div>
+          <p class="mb-2">Êtes-vous sûr de vouloir supprimer cette licence ?</p>
+          <div class="alert alert-info mt-3">
+            <strong>Licence :</strong> ${license.licenseName}<br>
+            <strong>Client :</strong> ${license.customerName}<br>
+            <strong>Type :</strong> ${license.licenseType}
+          </div>
+          <p class="text-danger small mt-2">
+            <i class="fas fa-warning"></i> Cette action est irréversible
+          </p>
+        </div>
+      `,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#dc3545',
+      cancelButtonColor: '#6c757d',
+      confirmButtonText: '<i class="fas fa-trash"></i> Supprimer',
+      cancelButtonText: '<i class="fas fa-times"></i> Annuler',
+      reverseButtons: true,
+      focusCancel: true,
+      customClass: {
+        popup: 'swal2-modern-popup',
+        title: 'swal2-modern-title',
+        confirmButton: 'btn btn-danger',
+        cancelButton: 'btn btn-secondary'
+      },
+      buttonsStyling: false
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.licenseService.deleteLicense(license.id!).subscribe({
+          next: () => {
+            Swal.fire({
+              title: 'Suppression réussie !',
+              text: `La licence "${license.licenseName}" a été supprimée avec succès.`,
+              icon: 'success',
+              confirmButtonColor: '#28a745',
+              confirmButtonText: 'OK',
+              customClass: {
+                popup: 'swal2-modern-popup',
+                confirmButton: 'btn btn-success'
+              },
+              buttonsStyling: false,
+              timer: 3000,
+              timerProgressBar: true
+            });
+            this.loadLicenses();
+            this.loadStatistics();
+          },
+          error: (error) => {
+            Swal.fire({
+              title: 'Erreur de suppression',
+              text: 'Une erreur est survenue lors de la suppression de la licence.',
+              icon: 'error',
+              confirmButtonColor: '#dc3545',
+              confirmButtonText: 'OK',
+              customClass: {
+                popup: 'swal2-modern-popup',
+                confirmButton: 'btn btn-danger'
+              },
+              buttonsStyling: false
+            });
+            console.error('Erreur:', error);
+          }
+        });
+      }
+    });
   }
 
   // Actions sur les licences
@@ -188,11 +248,24 @@ export class GestionLicencesComponent implements OnInit {
     if (license.isActive) {
       this.licenseService.deactivateLicense(license.id!).subscribe({
         next: (updatedLicense) => {
-          this.showMessage('Licence désactivée', 'success');
+          Swal.fire({
+            title: 'Licence désactivée',
+            text: `La licence "${license.licenseName}" a été désactivée avec succès.`,
+            icon: 'success',
+            confirmButtonColor: '#28a745',
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false
+          });
           this.loadLicenses();
         },
         error: (error) => {
-          this.showMessage('Erreur lors de la désactivation', 'error');
+          Swal.fire({
+            title: 'Erreur',
+            text: 'Erreur lors de la désactivation de la licence.',
+            icon: 'error',
+            confirmButtonColor: '#dc3545'
+          });
           console.error('Erreur:', error);
         }
       });
@@ -201,11 +274,24 @@ export class GestionLicencesComponent implements OnInit {
       const updatedLicense = { ...license, isActive: true };
       this.licenseService.updateLicense(license.id!, updatedLicense).subscribe({
         next: (result) => {
-          this.showMessage('Licence réactivée', 'success');
+          Swal.fire({
+            title: 'Licence réactivée',
+            text: `La licence "${license.licenseName}" a été réactivée avec succès.`,
+            icon: 'success',
+            confirmButtonColor: '#28a745',
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false
+          });
           this.loadLicenses();
         },
         error: (error) => {
-          this.showMessage('Erreur lors de la réactivation', 'error');
+          Swal.fire({
+            title: 'Erreur',
+            text: 'Erreur lors de la réactivation de la licence.',
+            icon: 'error',
+            confirmButtonColor: '#dc3545'
+          });
           console.error('Erreur:', error);
         }
       });
@@ -227,7 +313,12 @@ export class GestionLicencesComponent implements OnInit {
 
   validateLicense(): void {
     if (!this.validationKey.trim()) {
-      this.showMessage('Veuillez saisir une clé de licence', 'error');
+      Swal.fire({
+        title: 'Clé manquante',
+        text: 'Veuillez saisir une clé de licence à valider.',
+        icon: 'warning',
+        confirmButtonColor: '#ffc107'
+      });
       return;
     }
 
@@ -235,13 +326,28 @@ export class GestionLicencesComponent implements OnInit {
       next: (result) => {
         this.validationResult = result;
         if (result.valid) {
-          this.showMessage('Licence valide', 'success');
+          Swal.fire({
+            title: 'Licence valide !',
+            text: 'La clé de licence est valide et active.',
+            icon: 'success',
+            confirmButtonColor: '#28a745'
+          });
         } else {
-          this.showMessage(`Licence invalide: ${result.message}`, 'error');
+          Swal.fire({
+            title: 'Licence invalide',
+            text: `La clé de licence n'est pas valide : ${result.message}`,
+            icon: 'error',
+            confirmButtonColor: '#dc3545'
+          });
         }
       },
       error: (error) => {
-        this.showMessage('Erreur lors de la validation', 'error');
+        Swal.fire({
+          title: 'Erreur de validation',
+          text: 'Une erreur est survenue lors de la validation de la licence.',
+          icon: 'error',
+          confirmButtonColor: '#dc3545'
+        });
         console.error('Erreur:', error);
       }
     });
@@ -317,4 +423,3 @@ export class GestionLicencesComponent implements OnInit {
     return 'text-success';
   }
 }
-

@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Role, RoleService } from '../services/role.service';
 import { Permission, PermissionService } from '../services/permission.service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-gestion-roles',
@@ -150,7 +151,18 @@ export class GestionRolesComponent implements OnInit {
    */
   editRole(role: Role): void {
     if (role.isSystemRole) {
-      this.showError('Impossible de modifier un rôle système');
+      Swal.fire({
+        title: 'Action non autorisée',
+        text: 'Impossible de modifier un rôle système.',
+        icon: 'warning',
+        confirmButtonColor: '#ffc107',
+        confirmButtonText: 'Compris',
+        customClass: {
+          popup: 'swal2-modern-popup',
+          confirmButton: 'btn btn-warning'
+        },
+        buttonsStyling: false
+      });
       return;
     }
 
@@ -190,17 +202,32 @@ export class GestionRolesComponent implements OnInit {
    */
   validateRole(): boolean {
     if (!this.currentRole.name.trim()) {
-      this.showError('Le nom du rôle est obligatoire');
+      Swal.fire({
+        title: 'Champ requis',
+        text: 'Le nom du rôle est obligatoire.',
+        icon: 'warning',
+        confirmButtonColor: '#ffc107'
+      });
       return false;
     }
 
     if (!this.currentRole.displayName.trim()) {
-      this.showError('Le nom d\'affichage est obligatoire');
+      Swal.fire({
+        title: 'Champ requis',
+        text: 'Le nom d\'affichage est obligatoire.',
+        icon: 'warning',
+        confirmButtonColor: '#ffc107'
+      });
       return false;
     }
 
     if (!this.currentRole.description.trim()) {
-      this.showError('La description est obligatoire');
+      Swal.fire({
+        title: 'Champ requis',
+        text: 'La description est obligatoire.',
+        icon: 'warning',
+        confirmButtonColor: '#ffc107'
+      });
       return false;
     }
 
@@ -213,12 +240,25 @@ export class GestionRolesComponent implements OnInit {
   createRole(): void {
     this.roleService.createRole(this.currentRole).subscribe({
       next: (role) => {
-        this.showSuccess('Rôle créé avec succès');
+        Swal.fire({
+          title: 'Rôle créé !',
+          text: `Le rôle "${this.currentRole.displayName}" a été créé avec succès.`,
+          icon: 'success',
+          confirmButtonColor: '#28a745',
+          timer: 2500,
+          timerProgressBar: true,
+          showConfirmButton: false
+        });
         this.loadRoles();
         this.cancelForm();
       },
       error: (error) => {
-        this.showError('Erreur lors de la création du rôle: ' + (error.error || error.message));
+        Swal.fire({
+          title: 'Erreur de création',
+          text: 'Erreur lors de la création du rôle : ' + (error.error || error.message),
+          icon: 'error',
+          confirmButtonColor: '#dc3545'
+        });
         console.error('Erreur:', error);
       }
     });
@@ -232,12 +272,25 @@ export class GestionRolesComponent implements OnInit {
 
     this.roleService.updateRole(this.editingRoleId, this.currentRole).subscribe({
       next: (role) => {
-        this.showSuccess('Rôle modifié avec succès');
+        Swal.fire({
+          title: 'Rôle modifié !',
+          text: `Le rôle "${this.currentRole.displayName}" a été modifié avec succès.`,
+          icon: 'success',
+          confirmButtonColor: '#28a745',
+          timer: 2500,
+          timerProgressBar: true,
+          showConfirmButton: false
+        });
         this.loadRoles();
         this.cancelForm();
       },
       error: (error) => {
-        this.showError('Erreur lors de la modification du rôle: ' + (error.error || error.message));
+        Swal.fire({
+          title: 'Erreur de modification',
+          text: 'Erreur lors de la modification du rôle : ' + (error.error || error.message),
+          icon: 'error',
+          confirmButtonColor: '#dc3545'
+        });
         console.error('Erreur:', error);
       }
     });
@@ -248,20 +301,66 @@ export class GestionRolesComponent implements OnInit {
    */
   toggleRoleStatus(role: Role): void {
     if (role.isSystemRole) {
-      this.showError('Impossible de modifier le statut d\'un rôle système');
+      Swal.fire({
+        title: 'Action non autorisée',
+        text: 'Impossible de modifier le statut d\'un rôle système.',
+        icon: 'warning',
+        confirmButtonColor: '#ffc107',
+        confirmButtonText: 'Compris',
+        customClass: {
+          popup: 'swal2-modern-popup',
+          confirmButton: 'btn btn-warning'
+        },
+        buttonsStyling: false
+      });
       return;
     }
 
     if (!role.id) return;
 
-    this.roleService.toggleRoleStatus(role.id).subscribe({
-      next: (updatedRole) => {
-        this.showSuccess(`Rôle ${updatedRole.isActive ? 'activé' : 'désactivé'} avec succès`);
-        this.loadRoles();
+    const action = role.isActive ? 'désactiver' : 'activer';
+    const actionPast = role.isActive ? 'désactivé' : 'activé';
+
+    Swal.fire({
+      title: `${action.charAt(0).toUpperCase() + action.slice(1)} le rôle`,
+      text: `Voulez-vous vraiment ${action} le rôle "${role.displayName}" ?`,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: role.isActive ? '#dc3545' : '#28a745',
+      cancelButtonColor: '#6c757d',
+      confirmButtonText: `Oui, ${action}`,
+      cancelButtonText: 'Annuler',
+      customClass: {
+        popup: 'swal2-modern-popup',
+        confirmButton: 'btn',
+        cancelButton: 'btn btn-secondary'
       },
-      error: (error) => {
-        this.showError('Erreur lors du changement de statut: ' + (error.error || error.message));
-        console.error('Erreur:', error);
+      buttonsStyling: false
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.roleService.toggleRoleStatus(role.id!).subscribe({
+          next: (updatedRole) => {
+            Swal.fire({
+              title: `Rôle ${actionPast} !`,
+              text: `Le rôle "${role.displayName}" a été ${actionPast} avec succès.`,
+              icon: 'success',
+              confirmButtonColor: '#28a745',
+              timer: 2000,
+              timerProgressBar: true,
+              showConfirmButton: false
+            });
+            this.loadRoles();
+          },
+          error: (error) => {
+            Swal.fire({
+              title: 'Erreur',
+              text: 'Erreur lors du changement de statut : ' + (error.error || error.message),
+              icon: 'error',
+              confirmButtonColor: '#dc3545'
+            });
+            console.error('Erreur:', error);
+          }
+        });
       }
     });
   }
@@ -271,24 +370,94 @@ export class GestionRolesComponent implements OnInit {
    */
   deleteRole(role: Role): void {
     if (role.isSystemRole) {
-      this.showError('Impossible de supprimer un rôle système');
+      Swal.fire({
+        title: 'Action non autorisée',
+        text: 'Impossible de supprimer un rôle système.',
+        icon: 'warning',
+        confirmButtonColor: '#ffc107',
+        confirmButtonText: 'Compris',
+        customClass: {
+          popup: 'swal2-modern-popup',
+          confirmButton: 'btn btn-warning'
+        },
+        buttonsStyling: false
+      });
       return;
     }
 
     if (!role.id) return;
 
-    if (confirm(`Êtes-vous sûr de vouloir supprimer le rôle "${role.displayName}" ?`)) {
-      this.roleService.deleteRole(role.id).subscribe({
-        next: () => {
-          this.showSuccess('Rôle supprimé avec succès');
-          this.loadRoles();
-        },
-        error: (error) => {
-          this.showError('Erreur lors de la suppression: ' + (error.error || error.message));
-          console.error('Erreur:', error);
-        }
-      });
-    }
+    Swal.fire({
+      title: 'Confirmer la suppression',
+      html: `
+        <div class="text-center">
+          <div class="mb-3">
+            <i class="fas fa-user-shield text-danger" style="font-size: 3rem;"></i>
+          </div>
+          <p class="mb-2">Êtes-vous sûr de vouloir supprimer ce rôle ?</p>
+          <div class="alert alert-info mt-3">
+            <strong>Rôle :</strong> ${role.displayName}<br>
+            <strong>Description :</strong> ${role.description}<br>
+            <strong>Permissions :</strong> ${role.permissions.length} permission(s)
+          </div>
+          <p class="text-danger small mt-2">
+            <i class="fas fa-exclamation-triangle"></i> Cette action est irréversible et peut affecter les utilisateurs ayant ce rôle
+          </p>
+        </div>
+      `,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#dc3545',
+      cancelButtonColor: '#6c757d',
+      confirmButtonText: '<i class="fas fa-trash"></i> Supprimer',
+      cancelButtonText: '<i class="fas fa-times"></i> Annuler',
+      reverseButtons: true,
+      focusCancel: true,
+      customClass: {
+        popup: 'swal2-modern-popup',
+        title: 'swal2-modern-title',
+        confirmButton: 'btn btn-danger',
+        cancelButton: 'btn btn-secondary'
+      },
+      buttonsStyling: false
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.roleService.deleteRole(role.id!).subscribe({
+          next: () => {
+            Swal.fire({
+              title: 'Suppression réussie !',
+              text: `Le rôle "${role.displayName}" a été supprimé avec succès.`,
+              icon: 'success',
+              confirmButtonColor: '#28a745',
+              confirmButtonText: 'OK',
+              customClass: {
+                popup: 'swal2-modern-popup',
+                confirmButton: 'btn btn-success'
+              },
+              buttonsStyling: false,
+              timer: 3000,
+              timerProgressBar: true
+            });
+            this.loadRoles();
+          },
+          error: (error) => {
+            Swal.fire({
+              title: 'Erreur de suppression',
+              text: 'Erreur lors de la suppression : ' + (error.error || error.message),
+              icon: 'error',
+              confirmButtonColor: '#dc3545',
+              confirmButtonText: 'OK',
+              customClass: {
+                popup: 'swal2-modern-popup',
+                confirmButton: 'btn btn-danger'
+              },
+              buttonsStyling: false
+            });
+            console.error('Erreur:', error);
+          }
+        });
+      }
+    });
   }
 
   /**
@@ -379,4 +548,3 @@ export class GestionRolesComponent implements OnInit {
     return Object.keys(this.permissionsByModule);
   }
 }
-
