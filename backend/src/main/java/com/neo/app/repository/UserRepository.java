@@ -54,5 +54,17 @@ public interface UserRepository extends MongoRepository<UserEntity, String> {
 
     @Query(value = "{'roles': 'ADMIN_GENERAL'}", count = true)
     long countAdministrators();
+
+    // Méthodes de comptage pour les statistiques du dashboard
+    long countByIsActive(Boolean isActive);
+    
+    @Query(value = "{'roles': ?0}", count = true)
+    long countByRolesContaining(String role);
+    
+    @Query(value = "{'createdAt': {'$gte': ?0}}", count = true)
+    long countByCreatedAtAfter(java.util.Date date);
+    
+    @Query(value = "{'lastLogin': {'$gte': ?0}}", count = true)
+    long countByLastLoginAfter(java.util.Date date);
 }
 

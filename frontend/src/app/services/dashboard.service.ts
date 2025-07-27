@@ -1,5 +1,7 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { BehaviorSubject, Observable, interval, of } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 
 export interface DashboardStats {
   totalUsers: number;
@@ -40,50 +42,141 @@ export interface DashboardStats {
   providedIn: 'root'
 })
 export class DashboardService {
+  private apiUrl = 'http://localhost:8090/api/dashboard';
   private dashboardStatsSubject = new BehaviorSubject<DashboardStats>(this.getInitialStats());
   public dashboardStats$ = this.dashboardStatsSubject.asObservable();
 
-  constructor() {}
+  constructor(private http: HttpClient) {
+    // Charger les données initiales
+    this.loadStatsFromAPI();
+    
+    // Actualiser les données toutes les 30 secondes
+    interval(30000).subscribe(() => {
+      this.loadStatsFromAPI();
+    });
+  }
 
   private getInitialStats(): DashboardStats {
     return {
-      totalUsers: 156,
-      activeUsers: 89,
-      totalDocuments: 2847,
-      totalCampaigns: 45,
+      totalUsers: 0,
+      activeUsers: 0,
+      totalDocuments: 0,
+      totalCampaigns: 0,
       userStats: {
-        administrators: 8,
-        managers: 23,
-        standardUsers: 125,
-        newUsersThisMonth: 12,
-        activeSessionsToday: 67
+        administrators: 0,
+        managers: 0,
+        standardUsers: 0,
+        newUsersThisMonth: 0,
+        activeSessionsToday: 0
       },
       auditStats: {
-        totalActionsToday: 247,
-        creations: 45,
-        modifications: 128,
-        deletions: 12,
-        consultations: 62,
-        securityAlerts: 3,
-        failedLogins: 8
+        totalActionsToday: 0,
+        creations: 0,
+        modifications: 0,
+        deletions: 0,
+        consultations: 0,
+        securityAlerts: 0,
+        failedLogins: 0
       },
       licenseStats: {
-        totalLicenses: 200,
-        activeLicenses: 156,
-        expiringSoon: 15,
-        expired: 8,
-        utilizationRate: 78
+        totalLicenses: 0,
+        activeLicenses: 0,
+        expiringSoon: 0,
+        expired: 0,
+        utilizationRate: 0
       },
       roleStats: {
-        totalRoles: 12,
-        activeRoles: 10,
-        customRoles: 5
+        totalRoles: 0,
+        activeRoles: 0,
+        customRoles: 0
       }
     };
   }
 
   getCurrentStats(): DashboardStats {
     return this.dashboardStatsSubject.value;
+  }
+
+  /**
+   * Charge les statistiques depuis l'API
+   */
+  loadStatsFromAPI(): void {
+    this.http.get<any>(`${this.apiUrl}/stats`).pipe(
+      catchError(error => {
+        console.error('Erreur lors du chargement des statistiques:', error);
+        // En cas d'erreur, garder les données actuelles
+        return of(null);
+      })
+    ).subscribe(response => {
+      if (response && response.userStats) {
+        const stats: DashboardStats = {
+          totalUsers: response.userStats.totalUsers || 0,
+          activeUsers: response.userStats.activeUsers || 0,
+          totalDocuments: response.documentStats?.totalDocuments || 0,
+          totalCampaigns: response.campaignStats?.totalCampaigns || 0,
+          userStats: {
+            administrators: response.userStats.administrators || 0,
+            managers: response.userStats.managers || 0,
+            standardUsers: response.userStats.standardUsers || 0,
+            newUsersThisMonth: response.userStats.newUsersThisMonth || 0,
+            activeSessionsToday: response.userStats.activeSessionsToday || 0
+          },
+          auditStats: {
+            totalActionsToday: response.auditStats?.totalActionsToday || 0,
+            creations: response.auditStats?.creations || 0,
+            modifications: response.auditStats?.modifications || 0,
+            deletions: response.auditStats?.deletions || 0,
+            consultations: response.auditStats?.consultations || 0,
+            securityAlerts: response.auditStats?.securityAlerts || 0,
+            failedLogins: response.auditStats?.failedLogins || 0
+          },
+          licenseStats: {
+            totalLicenses: response.licenseStats?.totalLicenses || 0,
+            activeLicenses: response.licenseStats?.activeLicenses || 0,
+            expiringSoon: response.licenseStats?.expiringSoon || 0,
+            expired: response.licenseStats?.expired || 0,
+            utilizationRate: response.licenseStats?.utilizationRate || 0
+          },
+          roleStats: {
+            totalRoles: response.roleStats?.totalRoles || 0,
+            activeRoles: response.roleStats?.activeRoles || 0,
+            customRoles: response.roleStats?.customRoles || 0
+          }
+        };
+        
+        this.dashboardStatsSubject.next(stats);
+      }
+    });
+  }
+
+  /**
+   * Charge les activités récentes depuis l'API
+   */
+  loadRecentActivities(): Observable<any[]> {
+    return this.http.get<any>(`${this.apiUrl}/activities/recent`).pipe(
+      map(response => response.activities || []),
+      catchError(error => {
+        console.error('Erreur lors du chargement des activités récentes:', error);
+        return of([]);
+      })
+    );
+  }
+
+  /**
+   * Charge les métriques système depuis l'API
+   */
+  loadSystemHealth(): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/system/health`).pipe(
+      catchError(error => {
+        console.error('Erreur lors du chargement des métriques système:', error);
+        return of({
+          cpu: 0,
+          memory: 0,
+          storage: 0,
+          network: 0
+        });
+      })
+    );
   }
 
   // Méthodes pour mettre à jour les statistiques utilisateurs
@@ -94,6 +187,9 @@ export class DashboardService {
     currentStats.userStats.newUsersThisMonth++;
     this.dashboardStatsSubject.next(currentStats);
     this.logAuditAction('creation');
+    
+    // Recharger les données depuis l'API après un délai
+    setTimeout(() => this.loadStatsFromAPI(), 1000);
   }
 
   decrementUserCount(role: 'administrators' | 'managers' | 'standardUsers' = 'standardUsers'): void {
@@ -106,6 +202,9 @@ export class DashboardService {
     }
     this.dashboardStatsSubject.next(currentStats);
     this.logAuditAction('deletion');
+    
+    // Recharger les données depuis l'API après un délai
+    setTimeout(() => this.loadStatsFromAPI(), 1000);
   }
 
   updateUserRole(oldRole: 'administrators' | 'managers' | 'standardUsers', 
@@ -119,6 +218,9 @@ export class DashboardService {
     currentStats.userStats[newRole]++;
     this.dashboardStatsSubject.next(currentStats);
     this.logAuditAction('modification');
+    
+    // Recharger les données depuis l'API après un délai
+    setTimeout(() => this.loadStatsFromAPI(), 1000);
   }
 
   // Méthodes pour mettre à jour les statistiques de licences
@@ -129,6 +231,9 @@ export class DashboardService {
     this.updateLicenseUtilization(currentStats);
     this.dashboardStatsSubject.next(currentStats);
     this.logAuditAction('creation');
+    
+    // Recharger les données depuis l'API après un délai
+    setTimeout(() => this.loadStatsFromAPI(), 1000);
   }
 
   decrementLicenseCount(): void {
@@ -142,6 +247,9 @@ export class DashboardService {
     this.updateLicenseUtilization(currentStats);
     this.dashboardStatsSubject.next(currentStats);
     this.logAuditAction('deletion');
+    
+    // Recharger les données depuis l'API après un délai
+    setTimeout(() => this.loadStatsFromAPI(), 1000);
   }
 
   updateLicenseStatus(isActive: boolean): void {
@@ -156,6 +264,9 @@ export class DashboardService {
     this.updateLicenseUtilization(currentStats);
     this.dashboardStatsSubject.next(currentStats);
     this.logAuditAction('modification');
+    
+    // Recharger les données depuis l'API après un délai
+    setTimeout(() => this.loadStatsFromAPI(), 1000);
   }
 
   private updateLicenseUtilization(stats: DashboardStats): void {
@@ -174,6 +285,9 @@ export class DashboardService {
     currentStats.roleStats.customRoles++;
     this.dashboardStatsSubject.next(currentStats);
     this.logAuditAction('creation');
+    
+    // Recharger les données depuis l'API après un délai
+    setTimeout(() => this.loadStatsFromAPI(), 1000);
   }
 
   decrementRoleCount(): void {
@@ -189,6 +303,9 @@ export class DashboardService {
     }
     this.dashboardStatsSubject.next(currentStats);
     this.logAuditAction('deletion');
+    
+    // Recharger les données depuis l'API après un délai
+    setTimeout(() => this.loadStatsFromAPI(), 1000);
   }
 
   // Méthodes pour mettre à jour les statistiques de documents
@@ -197,6 +314,9 @@ export class DashboardService {
     currentStats.totalDocuments++;
     this.dashboardStatsSubject.next(currentStats);
     this.logAuditAction('creation');
+    
+    // Recharger les données depuis l'API après un délai
+    setTimeout(() => this.loadStatsFromAPI(), 1000);
   }
 
   decrementDocumentCount(): void {
@@ -206,6 +326,9 @@ export class DashboardService {
     }
     this.dashboardStatsSubject.next(currentStats);
     this.logAuditAction('deletion');
+    
+    // Recharger les données depuis l'API après un délai
+    setTimeout(() => this.loadStatsFromAPI(), 1000);
   }
 
   // Méthodes pour mettre à jour les statistiques de campagnes
@@ -214,6 +337,9 @@ export class DashboardService {
     currentStats.totalCampaigns++;
     this.dashboardStatsSubject.next(currentStats);
     this.logAuditAction('creation');
+    
+    // Recharger les données depuis l'API après un délai
+    setTimeout(() => this.loadStatsFromAPI(), 1000);
   }
 
   decrementCampaignCount(): void {
@@ -223,6 +349,9 @@ export class DashboardService {
     }
     this.dashboardStatsSubject.next(currentStats);
     this.logAuditAction('deletion');
+    
+    // Recharger les données depuis l'API après un délai
+    setTimeout(() => this.loadStatsFromAPI(), 1000);
   }
 
   // Méthode pour enregistrer les actions d'audit
@@ -249,13 +378,11 @@ export class DashboardService {
   // Méthode pour réinitialiser les statistiques
   resetStats(): void {
     this.dashboardStatsSubject.next(this.getInitialStats());
+    this.loadStatsFromAPI();
   }
 
   // Méthode pour charger les statistiques depuis une source externe (API)
-  loadStatsFromAPI(): Observable<DashboardStats> {
-    // Cette méthode pourrait être utilisée pour charger les vraies données depuis l'API
-    // Pour l'instant, on retourne les données actuelles
+  loadStatsFromAPIObservable(): Observable<DashboardStats> {
     return this.dashboardStats$;
   }
 }
-

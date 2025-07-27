@@ -57,5 +57,10 @@ public interface RoleRepository extends MongoRepository<RoleEntity, String> {
      * Trouve les rôles créés par un utilisateur spécifique
      */
     List<RoleEntity> findByCreatedBy(String createdBy);
+
+    // Méthodes de comptage pour les statistiques du dashboard
+    long countByIsActive(Boolean isActive);
+    
+    long countByIsSystemRole(Boolean isSystemRole);
 }
 

@@ -79,16 +79,25 @@ export class HomeComponent implements OnInit, OnDestroy {
   constructor(private dashboardService: DashboardService) {}
 
   ngOnInit(): void {
+    // S'abonner aux statistiques du tableau de bord
     this.dashboardSubscription = this.dashboardService.dashboardStats$.subscribe(
       (stats: DashboardStats) => {
         this.updateDashboardData(stats);
       }
     );
 
+    // Charger les activités récentes
+    this.loadRecentActivities();
+
+    // Charger les métriques système
+    this.loadSystemHealth();
+
+    // Mettre à jour les données en temps réel
     setInterval(() => {
       this.updateRealTimeData();
     }, 30000);
 
+    // Mettre à jour les utilisateurs actifs
     setInterval(() => {
       this.dashboardService.updateActiveUsers();
     }, 10000);
@@ -111,13 +120,65 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.roleStats = { ...stats.roleStats };
   }
 
+  private loadRecentActivities(): void {
+    this.dashboardService.loadRecentActivities().subscribe(
+      activities => {
+        this.recentActivities = activities.map(activity => ({
+          user: activity.user || 'Système',
+          action: activity.action || 'Action inconnue',
+          resource: activity.resource || 'Ressource',
+          time: this.formatTime(activity.time),
+          status: activity.status || 'success'
+        }));
+      },
+      error => {
+        console.error('Erreur lors du chargement des activités récentes:', error);
+        // Garder les activités par défaut en cas d'erreur
+        this.recentActivities = [];
+      }
+    );
+  }
+
+  private loadSystemHealth(): void {
+    this.dashboardService.loadSystemHealth().subscribe(
+      health => {
+        this.systemHealth = {
+          cpu: health.cpu || 0,
+          memory: health.memory || 0,
+          storage: health.storage || 0,
+          network: health.network || 0
+        };
+      },
+      error => {
+        console.error('Erreur lors du chargement des métriques système:', error);
+        // Garder les métriques par défaut en cas d'erreur
+      }
+    );
+  }
+
+  private formatTime(time: any): string {
+    if (!time) return new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+    
+    if (typeof time === 'string') {
+      return new Date(time).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+    }
+    
+    if (time instanceof Date) {
+      return time.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+    }
+    
+    return time.toString();
+  }
+
   updateRealTimeData(): void {
     this.currentDate = new Date();
-    this.systemHealth.cpu = Math.floor(Math.random() * 30) + 30;
-    this.systemHealth.memory = Math.floor(Math.random() * 40) + 50;
-    this.systemHealth.storage = Math.floor(Math.random() * 20) + 20;
-    this.systemHealth.network = Math.floor(Math.random() * 15) + 85;
     this.updateUserActivityChart();
+    
+    // Recharger les activités récentes
+    this.loadRecentActivities();
+    
+    // Recharger les métriques système
+    this.loadSystemHealth();
   }
 
   private updateUserActivityChart(): void {

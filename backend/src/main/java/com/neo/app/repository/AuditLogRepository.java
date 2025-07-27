@@ -87,5 +87,15 @@ public interface AuditLogRepository extends MongoRepository<AuditLogEntity, Stri
     // Méthodes pour obtenir les types de ressources les plus accédés
     @Query("{'resourceType': {'$exists': true}}")
     List<AuditLogEntity> findMostAccessedResourceTypes();
+
+    // Méthodes de comptage pour les statistiques du dashboard
+    @Query(value = "{'timestamp': {'$gte': ?0, '$lt': ?1}}", count = true)
+    long countByTimestampBetween(Date startDate, Date endDate);
+    
+    @Query(value = "{'success': ?0, 'timestamp': {'$gte': ?1, '$lt': ?2}}", count = true)
+    long countBySuccessAndTimestampBetween(Boolean success, Date startDate, Date endDate);
+    
+    @Query(value = "{'action': ?0, 'success': ?1, 'timestamp': {'$gte': ?2, '$lt': ?3}}", count = true)
+    long countByActionAndSuccessAndTimestampBetween(String action, Boolean success, Date startDate, Date endDate);
 }
 

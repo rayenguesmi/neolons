@@ -134,5 +134,12 @@ public interface LicenseRepository extends MongoRepository<LicenseEntity, String
            "{ $expr: { $gte: [{ $divide: ['$usageCount', '$maxUsage'] }, 0.8] } } " +
            "] }")
     List<LicenseEntity> findLicensesNeedingAttention(Date currentDate, Date warningDate);
+
+    // Méthodes de comptage pour les statistiques du dashboard
+    @Query(value = "{ 'expiryDate': { $gte: ?0, $lte: ?1 }, 'isActive': ?2 }", count = true)
+    long countByExpiryDateBetweenAndIsActive(Date startDate, Date endDate, Boolean isActive);
+    
+    @Query(value = "{ 'expiryDate': { $lt: ?0 }, 'isActive': ?1 }", count = true)
+    long countByExpiryDateBeforeAndIsActive(Date date, Boolean isActive);
 }
 
