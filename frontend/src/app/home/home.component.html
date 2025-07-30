@@ -530,17 +530,27 @@
                 </tr>
               </thead>
               <tbody>
-                <tr *ngFor="let activity of recentActivities">
-                  <td>{{ activity.user }}</td>
-                  <td>{{ activity.action }}</td>
-                  <td>{{ activity.resource }}</td>
-                  <td>{{ activity.time }}</td>
-                  <td>
-                    <span [class]="getStatusClass(activity.status)">
-                      {{ activity.status === 'success' ? 'Succès' : activity.status === 'failed' ? 'Échec' : activity.status }}
-                    </span>
-                  </td>
-                </tr>
+                <ng-container *ngIf="recentActivities.length > 0; else noActivities">
+                  <tr *ngFor="let activity of recentActivities">
+                    <td>{{ activity.user }}</td>
+                    <td>{{ activity.action }}</td>
+                    <td>{{ activity.resource }}</td>
+                    <td>{{ activity.time }}</td>
+                    <td>
+                      <span [class]="getStatusClass(activity.status)">
+                        {{ activity.status === 'success' ? 'Succès' : activity.status === 'failed' ? 'Échec' : activity.status }}
+                      </span>
+                    </td>
+                  </tr>
+                </ng-container>
+                <ng-template #noActivities>
+                  <tr>
+                    <td colspan="5" style="text-align: center; padding: 40px; color: #718096; font-style: italic;">
+                      <i class="fas fa-info-circle" style="margin-right: 8px;"></i>
+                      Aucune activité récente disponible
+                    </td>
+                  </tr>
+                </ng-template>
               </tbody>
             </table>
           </div>

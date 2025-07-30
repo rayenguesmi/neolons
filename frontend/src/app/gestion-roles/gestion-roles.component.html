@@ -49,7 +49,7 @@
       
       <form (ngSubmit)="saveRole()">
         <div class="form-group">
-          <label for="name">Nom du rôle *</label>
+          <label for="name">Role attribué*</label>
           <input 
             type="text" 
             id="name" 
@@ -61,7 +61,7 @@
         </div>
 
         <div class="form-group">
-          <label for="displayName">Nom d'affichage *</label>
+          <label for="displayName">Nom de l employé *</label>
           <input 
             type="text" 
             id="displayName" 
@@ -73,7 +73,7 @@
         </div>
 
         <div class="form-group">
-          <label for="description">Description *</label>
+          <label for="description">Description du role  *</label>
           <textarea 
             id="description" 
             [(ngModel)]="currentRole.description" 
@@ -139,9 +139,9 @@
     <table class="roles-table">
       <thead>
         <tr>
-          <th>Nom d'affichage</th>
-          <th>Nom technique</th>
-          <th>Description</th>
+          <th>Nom de l employé</th>
+          <th>Role attribué</th>
+          <th>Description du role </th>
           <th>Type</th>
           <th>Permissions</th>
           <th>Statut</th>
