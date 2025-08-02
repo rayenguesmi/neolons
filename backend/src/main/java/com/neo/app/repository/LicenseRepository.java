@@ -141,5 +141,12 @@ public interface LicenseRepository extends MongoRepository<LicenseEntity, String
     
     @Query(value = "{ 'expiryDate': { $lt: ?0 }, 'isActive': ?1 }", count = true)
     long countByExpiryDateBeforeAndIsActive(Date date, Boolean isActive);
+
+    // Méthodes spécifiques pour le scheduler d'expiration
+    List<LicenseEntity> findByIsActiveTrue();
+    
+    List<LicenseEntity> findByIsActiveTrueAndExpiryDateBefore(Date date);
+    
+    List<LicenseEntity> findByIsActiveTrueAndExpiryDateBetween(Date startDate, Date endDate);
 }
 

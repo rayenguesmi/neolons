@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Role, RoleService } from '../services/role.service';
 import { Permission, PermissionService } from '../services/permission.service';
+import { User, UserService } from '../services/user.service';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -11,6 +12,7 @@ import Swal from 'sweetalert2';
 export class GestionRolesComponent implements OnInit {
   roles: Role[] = [];
   permissions: Permission[] = [];
+  users: User[] = []; // Liste des utilisateurs
   filteredRoles: Role[] = [];
   
   // Formulaire de création/modification
@@ -18,8 +20,15 @@ export class GestionRolesComponent implements OnInit {
     name: '',
     displayName: '',
     description: '',
+    department: '',
     permissions: [],
-    isActive: true
+    isActive: true,
+    adminAccess: false,
+    userManagement: false,
+    projectAccess: false,
+    reportAccess: false,
+    userId: '', // ID de l'utilisateur sélectionné
+    userFullName: '' // Nom complet de l'utilisateur
   };
   
   isEditing = false;
@@ -41,12 +50,14 @@ export class GestionRolesComponent implements OnInit {
 
   constructor(
     private roleService: RoleService,
-    private permissionService: PermissionService
+    private permissionService: PermissionService,
+    private userService: UserService // Injection du service utilisateur
   ) { }
 
   ngOnInit(): void {
     this.loadRoles();
     this.loadPermissions();
+    this.loadUsers(); // Charger les utilisateurs
   }
 
   /**
@@ -82,6 +93,63 @@ export class GestionRolesComponent implements OnInit {
   }
 
   /**
+   * Charge tous les utilisateurs
+   */
+  loadUsers(): void {
+    this.userService.getAllUsers().subscribe({
+      next: (users) => {
+        this.users = users.filter(user => user.isActive); // Ne récupérer que les utilisateurs actifs
+      },
+      error: (error) => {
+        this.showError('Erreur lors du chargement des utilisateurs');
+        console.error('Erreur:', error);
+      }
+    });
+  }
+
+  /**
+   * Gère la sélection d'un utilisateur
+   */
+  onUserSelection(userId: string): void {
+    if (!userId) {
+      this.currentRole.userId = '';
+      this.currentRole.userFullName = '';
+      this.currentRole.displayName = '';
+      return;
+    }
+
+    const selectedUser = this.users.find(user => user.id === userId);
+    if (selectedUser) {
+      this.currentRole.userId = userId;
+      this.currentRole.userFullName = `${selectedUser.firstName} ${selectedUser.lastName}`;
+      this.currentRole.displayName = this.currentRole.userFullName;
+    } else {
+      this.currentRole.userId = '';
+      this.currentRole.userFullName = '';
+      this.currentRole.displayName = '';
+    }
+  }
+
+  /**
+   * Vérifie si un utilisateur a déjà un rôle assigné
+   */
+  isUserAlreadyAssigned(userId: string | undefined): boolean {
+    if (!userId) return false;
+    
+    if (this.isEditing && this.currentRole.userId === userId) {
+      return false; // L'utilisateur actuel peut garder son rôle
+    }
+    return this.roles.some(role => role.userId === userId && role.isActive);
+  }
+
+  /**
+   * Retourne les utilisateurs disponibles (sans rôle actif assigné)
+   */
+  getAvailableUsers(): User[] {
+    return this.users.filter(user => !this.isUserAlreadyAssigned(user.id!));
+  }
+
+  /**
    * Groupe les permissions par module
    */
   groupPermissionsByModule(): void {
@@ -103,7 +171,8 @@ export class GestionRolesComponent implements OnInit {
       const matchesSearch = !this.searchTerm || 
         role.displayName.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
         role.name.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-        role.description.toLowerCase().includes(this.searchTerm.toLowerCase());
+        role.description.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+        (role.userFullName && role.userFullName.toLowerCase().includes(this.searchTerm.toLowerCase()));
 
       // Filtre par type de rôle
       const matchesType = (this.showSystemRoles && role.isSystemRole) || 
@@ -138,8 +207,15 @@ export class GestionRolesComponent implements OnInit {
       name: '',
       displayName: '',
       description: '',
+      department: '',
       permissions: [],
-      isActive: true
+      isActive: true,
+      adminAccess: false,
+      userManagement: false,
+      projectAccess: false,
+      reportAccess: false,
+      userId: '',
+      userFullName: ''
     };
     this.isEditing = false;
     this.editingRoleId = null;
@@ -204,17 +280,17 @@ export class GestionRolesComponent implements OnInit {
     if (!this.currentRole.name.trim()) {
       Swal.fire({
         title: 'Champ requis',
-        text: 'Le nom du rôle est obligatoire.',
+        text: 'Le rôle attribué est obligatoire.',
         icon: 'warning',
         confirmButtonColor: '#ffc107'
       });
       return false;
     }
 
-    if (!this.currentRole.displayName.trim()) {
+    if (!this.currentRole.userId) {
       Swal.fire({
         title: 'Champ requis',
-        text: 'Le nom d\'affichage est obligatoire.',
+        text: 'Veuillez sélectionner un employé.',
         icon: 'warning',
         confirmButtonColor: '#ffc107'
       });
@@ -225,6 +301,16 @@ export class GestionRolesComponent implements OnInit {
       Swal.fire({
         title: 'Champ requis',
         text: 'La description est obligatoire.',
+        icon: 'warning',
+        confirmButtonColor: '#ffc107'
+      });
+      return false;
+    }
+
+    if (!this.currentRole.department || this.currentRole.department.trim() === '') {
+      Swal.fire({
+        title: 'Champ requis',
+        text: 'Le département / équipe est obligatoire.',
         icon: 'warning',
         confirmButtonColor: '#ffc107'
       });
@@ -242,7 +328,7 @@ export class GestionRolesComponent implements OnInit {
       next: (role) => {
         Swal.fire({
           title: 'Rôle créé !',
-          text: `Le rôle "${this.currentRole.displayName}" a été créé avec succès.`,
+          text: `Le rôle "${this.currentRole.name}" a été assigné à ${this.currentRole.userFullName} avec succès.`,
           icon: 'success',
           confirmButtonColor: '#28a745',
           timer: 2500,
@@ -250,6 +336,7 @@ export class GestionRolesComponent implements OnInit {
           showConfirmButton: false
         });
         this.loadRoles();
+        this.loadUsers(); // Recharger les utilisateurs pour mettre à jour la liste
         this.cancelForm();
       },
       error: (error) => {
@@ -274,7 +361,7 @@ export class GestionRolesComponent implements OnInit {
       next: (role) => {
         Swal.fire({
           title: 'Rôle modifié !',
-          text: `Le rôle "${this.currentRole.displayName}" a été modifié avec succès.`,
+          text: `Le rôle "${this.currentRole.name}" pour ${this.currentRole.userFullName} a été modifié avec succès.`,
           icon: 'success',
           confirmButtonColor: '#28a745',
           timer: 2500,
@@ -282,6 +369,7 @@ export class GestionRolesComponent implements OnInit {
           showConfirmButton: false
         });
         this.loadRoles();
+        this.loadUsers(); // Recharger les utilisateurs
         this.cancelForm();
       },
       error: (error) => {
@@ -323,7 +411,7 @@ export class GestionRolesComponent implements OnInit {
 
     Swal.fire({
       title: `${action.charAt(0).toUpperCase() + action.slice(1)} le rôle`,
-      text: `Voulez-vous vraiment ${action} le rôle "${role.displayName}" ?`,
+      text: `Voulez-vous vraiment ${action} le rôle "${role.name}" pour ${role.userFullName} ?`,
       icon: 'question',
       showCancelButton: true,
       confirmButtonColor: role.isActive ? '#dc3545' : '#28a745',
@@ -342,7 +430,7 @@ export class GestionRolesComponent implements OnInit {
           next: (updatedRole) => {
             Swal.fire({
               title: `Rôle ${actionPast} !`,
-              text: `Le rôle "${role.displayName}" a été ${actionPast} avec succès.`,
+              text: `Le rôle "${role.name}" pour ${role.userFullName} a été ${actionPast} avec succès.`,
               icon: 'success',
               confirmButtonColor: '#28a745',
               timer: 2000,
@@ -350,6 +438,7 @@ export class GestionRolesComponent implements OnInit {
               showConfirmButton: false
             });
             this.loadRoles();
+            this.loadUsers(); // Recharger pour mettre à jour les utilisateurs disponibles
           },
           error: (error) => {
             Swal.fire({
@@ -396,12 +485,13 @@ export class GestionRolesComponent implements OnInit {
           </div>
           <p class="mb-2">Êtes-vous sûr de vouloir supprimer ce rôle ?</p>
           <div class="alert alert-info mt-3">
-            <strong>Rôle :</strong> ${role.displayName}<br>
+            <strong>Employé :</strong> ${role.userFullName}<br>
+            <strong>Rôle :</strong> ${role.name}<br>
             <strong>Description :</strong> ${role.description}<br>
             <strong>Permissions :</strong> ${role.permissions.length} permission(s)
           </div>
           <p class="text-danger small mt-2">
-            <i class="fas fa-exclamation-triangle"></i> Cette action est irréversible et peut affecter les utilisateurs ayant ce rôle
+            <i class="fas fa-exclamation-triangle"></i> Cette action est irréversible et libérera l'utilisateur de ce rôle
           </p>
         </div>
       `,
@@ -426,7 +516,7 @@ export class GestionRolesComponent implements OnInit {
           next: () => {
             Swal.fire({
               title: 'Suppression réussie !',
-              text: `Le rôle "${role.displayName}" a été supprimé avec succès.`,
+              text: `Le rôle "${role.name}" pour ${role.userFullName} a été supprimé avec succès.`,
               icon: 'success',
               confirmButtonColor: '#28a745',
               confirmButtonText: 'OK',
@@ -439,6 +529,7 @@ export class GestionRolesComponent implements OnInit {
               timerProgressBar: true
             });
             this.loadRoles();
+            this.loadUsers(); // Recharger pour libérer l'utilisateur
           },
           error: (error) => {
             Swal.fire({
@@ -546,5 +637,14 @@ export class GestionRolesComponent implements OnInit {
    */
   getModuleKeys(): string[] {
     return Object.keys(this.permissionsByModule);
+  }
+
+  /**
+   * Retourne l'email de l'utilisateur par son ID
+   */
+  getUserEmail(userId: string | undefined): string {
+    if (!userId) return '';
+    const user = this.users.find(u => u.id === userId);
+    return user ? user.email || '' : '';
   }
 }

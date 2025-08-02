@@ -1,5 +1,6 @@
 server:
   port: 8090
+
 logging:
   level:
     root: DEBUG
@@ -41,10 +42,34 @@ spring:
             authorization-grant-type: client_credentials
         provider:
           keycloak:
-            issuer-uri: ${keycloak.url}/realms/${keycloak.realm}
-            token-uri: ${keycloak.url}/realms/${keycloak.realm}/protocol/openid-connect/token
-            authorization-uri: ${keycloak.url}/realms/${keycloak.realm}/protocol/openid-connect/auth
-            user-info-uri: ${keycloak.url}/realms/${keycloak.realm}/protocol/openid-connect/userinfo
-            jwk-set-uri: ${keycloak.url}/realms/${keycloak.realm}/protocol/openid-connect/certs
+            issuer-uri: http://localhost:8082/realms/Neo_TM
+            token-uri: http://localhost:8082/realms/Neo_TM/protocol/openid-connect/token
+            authorization-uri: http://localhost:8082/realms/Neo_TM/protocol/openid-connect/auth
+            user-info-uri: http://localhost:8082/realms/Neo_TM/protocol/openid-connect/userinfo
+            jwk-set-uri: http://localhost:8082/realms/Neo_TM/protocol/openid-connect/certs
 
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: grayen274@gmail.com
+    password: rayen123 # ← ⚠️ ici colle le mot de passe d'application Gmail
+    protocol: smtp
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+          connectiontimeout: 5000
+          timeout: 3000
+          writetimeout: 5000
 
+app:
+  company:
+    name: Neolons
+    support-email: support@neolons.com
+  license:
+    notification:
+      enabled: true
+    reminder:
+      days: 7,3,1

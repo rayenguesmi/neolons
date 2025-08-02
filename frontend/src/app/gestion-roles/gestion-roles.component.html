@@ -16,7 +16,7 @@
         type="text" 
         [(ngModel)]="searchTerm" 
         (input)="onSearch()" 
-        placeholder="Rechercher un rôle..."
+        placeholder="Rechercher un rôle ou un employé..."
         class="search-input">
     </div>
 
@@ -37,7 +37,7 @@
 
     <div class="action-section">
       <button class="btn btn-primary" (click)="showCreateForm()">
-        Créer un rôle
+        Assigner un rôle
       </button>
     </div>
   </div>
@@ -45,35 +45,52 @@
   <!-- Formulaire de création/modification -->
   <div *ngIf="showForm" class="form-modal">
     <div class="form-container">
-      <h3>{{ isEditing ? 'Modifier le rôle' : 'Créer un nouveau rôle' }}</h3>
+      <h3>{{ isEditing ? 'Modifier l\'assignation de rôle' : 'Assigner un nouveau rôle' }}</h3>
       
       <form (ngSubmit)="saveRole()">
         <div class="form-group">
-          <label for="name">Role attribué*</label>
-          <input 
-            type="text" 
-            id="name" 
-            [(ngModel)]="currentRole.name" 
-            name="name"
-            required
-            placeholder="Ex: CHEF_PROJET"
-            class="form-input">
+          <label for="name">Rôle à attribuer *</label>
+          <select id="name" [(ngModel)]="currentRole.name" name="name" required class="form-input">
+            <option value="">Sélectionner un rôle</option>
+            <option value="Administrateur">Administrateur</option>
+            <option value="Utilisateur">Utilisateur</option>
+            <option value="Testeur">Testeur</option>
+            <option value="Responsable de validation">Responsable de validation</option>
+            <option value="Gestionnaire de campagne">Gestionnaire de campagne</option>
+          </select>
         </div>
 
         <div class="form-group">
-          <label for="displayName">Nom de l employé *</label>
-          <input 
-            type="text" 
-            id="displayName" 
-            [(ngModel)]="currentRole.displayName" 
-            name="displayName"
+          <label for="userId">Sélectionner l'employé *</label>
+          <select 
+            id="userId" 
+            [(ngModel)]="currentRole.userId" 
+            name="userId"
             required
-            placeholder="Ex: Chef de Projet"
-            class="form-input">
+            class="form-input"
+            (change)="onUserSelection(currentRole.userId || '')">
+            <option value="">Choisir un employé</option>
+            <option 
+              *ngFor="let user of getAvailableUsers()" 
+              [value]="user.id"
+              [disabled]="isUserAlreadyAssigned(user.id!)">
+              {{ user.firstName }} {{ user.lastName }} ({{ user.email }})
+            </option>
+            <!-- Si on modifie, afficher l'utilisateur actuel même s'il a déjà un rôle -->
+            <option 
+              *ngIf="isEditing && currentRole.userId" 
+              [value]="currentRole.userId"
+              [selected]="true">
+              {{ currentRole.userFullName }}
+            </option>
+          </select>
+          <small class="form-hint">
+            Seuls les employés sans rôle actif sont affichés
+          </small>
         </div>
 
         <div class="form-group">
-          <label for="description">Description du role  *</label>
+          <label for="description">Description du rôle *</label>
           <textarea 
             id="description" 
             [(ngModel)]="currentRole.description" 
@@ -85,10 +102,43 @@
         </div>
 
         <div class="form-group">
+          <label for="department">Département / Équipe *</label>
+          <select id="department" [(ngModel)]="currentRole.department" name="department" required class="form-input">
+            <option value="">Sélectionner un département</option>
+            <option value="projet 1">Projet 1</option>
+            <option value="projet 2">Projet 2</option>
+            <option value="projet 3">Projet 3</option>
+          </select>
+        </div>
+
+        <div class="form-group">
           <label class="checkbox-label">
             <input type="checkbox" [(ngModel)]="currentRole.isActive" name="isActive">
-            Rôle actif
+            Statut du rôle actif
           </label>
+        </div>
+
+        <!-- Section Permissions associées -->
+        <div class="permissions-section">
+          <h4>Permissions associées</h4>
+          <div class="permissions-list">
+            <label class="checkbox-label">
+              <input type="checkbox" [(ngModel)]="currentRole.adminAccess" name="adminAccess">
+              Accès à l'interface d'administration
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" [(ngModel)]="currentRole.userManagement" name="userManagement">
+              Gestion des utilisateurs
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" [(ngModel)]="currentRole.projectAccess" name="projectAccess">
+              Accès aux projets
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" [(ngModel)]="currentRole.reportAccess" name="reportAccess">
+              Accès aux rapports
+            </label>
+          </div>
         </div>
 
         <!-- Sélection des permissions -->
@@ -124,7 +174,7 @@
 
         <div class="form-actions">
           <button type="submit" class="btn btn-primary">
-            {{ isEditing ? 'Modifier' : 'Créer' }}
+            {{ isEditing ? 'Modifier l\'assignation' : 'Assigner le rôle' }}
           </button>
           <button type="button" class="btn btn-secondary" (click)="cancelForm()">
             Annuler
@@ -139,25 +189,38 @@
     <table class="roles-table">
       <thead>
         <tr>
-          <th>Nom de l employé</th>
-          <th>Role attribué</th>
-          <th>Description du role </th>
+          <th>Nom de l'employé</th>
+          <th>Email</th>
+          <th>Rôle attribué</th>
+          <th>Description du rôle</th>
+          <th>Département / Équipe</th>
           <th>Type</th>
           <th>Permissions</th>
-          <th>Statut</th>
+          <th>Statut du rôle</th>
           <th>Actions</th>
         </tr>
       </thead>
       <tbody>
         <tr *ngFor="let role of filteredRoles" [class.inactive]="!role.isActive">
           <td>
-            <strong>{{ role.displayName }}</strong>
+            <div class="user-info">
+              <strong>{{ role.userFullName || role.displayName }}</strong>
+              <small *ngIf="role.userId" class="user-id">ID: {{ role.userId }}</small>
+            </div>
+          </td>
+          <td>
+            <span class="user-email">
+              {{ getUserEmail(role.userId) }}
+            </span>
           </td>
           <td>
             <code>{{ role.name }}</code>
           </td>
           <td>
             {{ role.description }}
+          </td>
+          <td>
+            {{ role.department }}
           </td>
           <td>
             <span class="badge" [class.system]="role.isSystemRole" [class.custom]="!role.isSystemRole">
@@ -215,4 +278,3 @@
     </div>
   </div>
 </div>
-

@@ -7,12 +7,20 @@ export interface Role {
   name: string;
   displayName: string;
   description: string;
+  department?: string;
   permissions: string[];
   isActive: boolean;
   isSystemRole?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
   createdBy?: string;
+  adminAccess?: boolean;
+  userManagement?: boolean;
+  projectAccess?: boolean;
+  reportAccess?: boolean;
+  // Nouveau champ pour l'utilisateur sélectionné
+  userId?: string;
+  userFullName?: string;
 }
 
 @Injectable({
@@ -121,4 +129,3 @@ export class RoleService {
     return this.http.post<string>(`${this.apiUrl}/initialize-defaults`, {}, { headers: this.getHeaders() });
   }
 }
-

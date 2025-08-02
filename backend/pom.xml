@@ -70,7 +70,23 @@
 			<scope>provided</scope>
 		</dependency>
 
+		<!-- Dépendance pour l'envoi d'emails -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-mail</artifactId>
+		</dependency>
 
+		<!-- Dépendance pour les tâches planifiées -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-quartz</artifactId>
+		</dependency>
+
+		<!-- Dépendance pour les templates Thymeleaf (pour les emails HTML) -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-thymeleaf</artifactId>
+		</dependency>
 
 	</dependencies>
 

@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notification d'expiration de licence</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .email-container {
+            background-color: #ffffff;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            text-align: center;
+            border-bottom: 3px solid #e74c3c;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        .alert-badge {
+            background-color: #e74c3c;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            display: inline-block;
+            margin-top: 10px;
+        }
+        .content {
+            margin-bottom: 30px;
+        }
+        .greeting {
+            font-size: 18px;
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+        .message {
+            font-size: 16px;
+            margin-bottom: 25px;
+            line-height: 1.8;
+        }
+        .license-details {
+            background-color: #f8f9fa;
+            border-left: 4px solid #3498db;
+            padding: 20px;
+            margin: 25px 0;
+            border-radius: 5px;
+        }
+        .license-details h3 {
+            color: #2c3e50;
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding: 5px 0;
+            border-bottom: 1px solid #ecf0f1;
+        }
+        .detail-label {
+            font-weight: bold;
+            color: #34495e;
+        }
+        .detail-value {
+            color: #2c3e50;
+        }
+        .expiry-date {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        .action-section {
+            background-color: #ecf0f1;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            margin: 25px 0;
+        }
+        .cta-button {
+            background-color: #3498db;
+            color: white;
+            padding: 12px 30px;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: bold;
+            display: inline-block;
+            margin: 10px;
+            transition: background-color 0.3s;
+        }
+        .cta-button:hover {
+            background-color: #2980b9;
+        }
+        .support-info {
+            background-color: #d5f4e6;
+            border: 1px solid #27ae60;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .support-info h4 {
+            color: #27ae60;
+            margin-top: 0;
+        }
+        .footer {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid #ecf0f1;
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+        .footer a {
+            color: #3498db;
+            text-decoration: none;
+        }
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+            .email-container {
+                padding: 20px;
+            }
+            .detail-row {
+                flex-direction: column;
+            }
+            .detail-label {
+                margin-bottom: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="header">
+            <div class="logo" th:text="${companyName}">Neolons</div>
+            <div class="alert-badge">LICENCE EXPIRÉE</div>
+        </div>
+
+        <div class="content">
+            <div class="greeting">
+                Bonjour <span th:text="${customerName}">Client</span>,
+            </div>
+
+            <div class="message">
+                Nous vous informons que votre licence pour le produit 
+                <strong th:text="${productName}">Produit</strong> a expiré.
+                Votre accès au produit pourrait être limité ou suspendu.
+            </div>
+
+            <div class="license-details">
+                <h3>📋 Détails de la licence</h3>
+                <div class="detail-row">
+                    <span class="detail-label">Nom de la licence:</span>
+                    <span class="detail-value" th:text="${licenseName}">Licence</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Type de licence:</span>
+                    <span class="detail-value" th:text="${licenseType}">Type</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Produit:</span>
+                    <span class="detail-value" th:text="${productName}">Produit</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Date d'expiration:</span>
+                    <span class="detail-value expiry-date" th:text="${expiryDate}">Date</span>
+                </div>
+            </div>
+
+            <div class="action-section">
+                <h3>🔄 Renouveler votre licence</h3>
+                <p>Pour continuer à utiliser nos services sans interruption, renouvelez votre licence dès maintenant.</p>
+                <a href="#" class="cta-button">Renouveler maintenant</a>
+                <a href="#" class="cta-button" style="background-color: #95a5a6;">Contacter le support</a>
+            </div>
+
+            <div class="support-info">
+                <h4>🆘 Besoin d'aide ?</h4>
+                <p>
+                    Notre équipe support est là pour vous aider. 
+                    Contactez-nous à l'adresse: 
+                    <a th:href="'mailto:' + ${supportEmail}" th:text="${supportEmail}">support@neolons.com</a>
+                </p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>
+                Cet email a été envoyé par <span th:text="${companyName}">Neolons</span><br>
+                © <span th:text="${currentYear}">2024</span> <span th:text="${companyName}">Neolons</span>. Tous droits réservés.
+            </p>
+            <p>
+                <a href="#">Se désabonner</a> | 
+                <a href="#">Politique de confidentialité</a> | 
+                <a href="#">Conditions d'utilisation</a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>
+
